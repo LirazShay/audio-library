@@ -24,38 +24,37 @@ M1 — Basic Generator
 - M1.1 — Generator scanner foundation
 - M1.2 — Topic/Track model builder and Audio/TXT matching
 - M1.3 — deterministic IDs and library document envelope
+- M1.4 — atomic library writer and final generator summary
 
-## M1.3 result
-- Added deterministic path-derived IDs using SHA-256
-- Track IDs use `track_` prefix
-- Topic IDs use `topic_` prefix
-- Root ID is fixed as `root`
-- Relative paths are normalized to NFC before hashing
-- Added `schemaVersion: 1`
-- Added ISO `generatedAt`
-- Added `site.name` to the library document so the UI can read the site name from JSON
-- Added pretty JSON serialization with 2-space indentation
-- Added parse validation of the serialized document
-- Serialization remains deterministic when the same `generatedAt` value is supplied
-- M1.3 intentionally does not write `src/data/library.json` yet
+## M1.4 result
+- Added atomic output writing for `src/data/library.json`
+- Output directory is created automatically when needed
+- Generator writes to a unique temporary file in the same directory
+- Temporary JSON is read back and parsed before replacement
+- `schemaVersion` and `root` are checked before replacement
+- Final replacement uses `rename` only after validation succeeds
+- Temporary files are removed in a `finally` block
+- A failed generation/write leaves the previous `library.json` untouched
+- Local content errors still allow the valid remainder of the library to be written and return exit code 1
+- Critical generator failures return exit code 2
+- Final console output now includes the generated output path and completion state
 
-## M1.3 verification
-Verified directly against the committed generator source:
-- crypto-based deterministic ID generation is present
-- Topic and Track IDs are generated from normalized relative paths
-- root ID is stable
-- schemaVersion/site/generatedAt envelope is present
-- pretty serialization is present
-- serialized output is parsed back for validation
-- no `writeFile`/`rename` output step exists yet
-
-Note: an additional local runtime test could not download the public GitHub file because the isolated container had no DNS access. This was an environment limitation, not a generator error.
+## M1.4 verification
+Verified against the committed source:
+- temporary write exists
+- read-back JSON validation exists
+- envelope validation exists
+- final rename happens after validation
+- temporary cleanup exists
+- exit code 1 is preserved for local content errors
+- exit code 2 is preserved for critical failures
+- writer is exported for later tests
 
 ## Deployment
-GitHub Pages workflow is configured and has deployed successfully after Pages was enabled.
+GitHub Pages workflow is configured and active.
 
 ## Next
-M1.4 — write `src/data/library.json` atomically (temporary file + replace), preserve the previous valid file on failure, and print the final generator summary/output path.
+M1.5 — add focused Generator tests/fixtures for recursive content, stable IDs, natural ordering, Audio/TXT matching, orphan TXT, duplicate basenames, and atomic-write failure behavior; then decide whether M1 is complete.
 
 ## Working rule
 "Continue to the next stage" advances one logical unit of work, which may be a sub-stage of a milestone rather than the whole milestone.
