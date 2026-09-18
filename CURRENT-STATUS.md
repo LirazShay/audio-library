@@ -22,32 +22,59 @@ M1 — Basic Generator
 - Production / Release Checklist
 - M0 — Project Skeleton
 
+## Current repository layout
+
+```text
+/
+├── src/                         # deployed runtime site
+│   ├── index.html
+│   ├── 404.html
+│   ├── app/
+│   ├── styles/
+│   ├── content/
+│   ├── data/
+│   └── config/
+├── tools/                       # generator and development tools
+├── docs/                        # project documentation
+├── .github/workflows/
+│   └── deploy-pages.yml
+├── CURRENT-STATUS.md
+├── README.md
+└── .gitignore
+```
+
 ## M0 result
-- Static `index.html` with `lang="he"` and `dir="rtl"`
+- Static site entry point moved to `src/index.html`
 - Preact + HTM + Signals loaded through pinned Import Map URLs
 - Browser-native ES Modules
-- Source code organized under `src/`
-- `src/app/main.js` bootstrap
-- `src/app/app.js` minimal application shell
-- Plain CSS under `src/styles/`
-- `content/`, `data/`, and `tools/` initialized
-- Runtime/generated JSON is planned under `data/`, not repository root
+- Source code organized under `src/app/`
+- Plain CSS organized under `src/styles/`
+- Runtime content is under `src/content/`
+- Generated runtime data is under `src/data/`
+- Runtime configuration has a dedicated `src/config/` directory
+- Generator/development tooling remains outside the deployed site under `tools/`
+- GitHub Pages workflow publishes only `src/`
 - No Backend
 - No mandatory Build step
-- README includes local static-server instructions
 
-## M0 verification
-- Required M0 repository files are present
-- No stale `app/` or `styles/` source files remain at repository root
-- Source-code structure is clean and grouped under `src/`
-- Changes are committed to `main`
-- No M1 functionality was added
+## Deployment
+- Workflow exists at `.github/workflows/deploy-pages.yml`
+- The workflow is triggered on pushes to `main`
+- GitHub Pages itself still requires one-time repository enablement with source set to GitHub Actions
+- Until that repository setting is enabled, the Pages workflow fails at the GitHub Pages configuration step
 
-## Known issues
-- Live browser preview still requires GitHub Pages to be enabled or a local static server. This does not change the M0 source structure.
+## Verification
+- No root `index.html`
+- No root `404.html`
+- No root `content/`
+- No root `data/`
+- Runtime and deployment files are isolated under `src/`
+- Technical documentation has been amended to reflect the `src/` deployment layout
 
 ## Next
-Implement M1 — Basic Generator according to `docs/07-development-plan.md` and `docs/03-content-generator-spec.md`.
+1. Enable GitHub Pages once in repository Settings → Pages → Source: GitHub Actions.
+2. Re-run or trigger the Pages workflow.
+3. Continue with M1 — Basic Generator using `src/content/` as input and `src/data/library.json` as output.
 
 ## Working rule
 GitHub is the source of truth. Each milestone should end with:
