@@ -1,0 +1,30 @@
+name: Test Generator
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - tools/generate-library.js
+      - tools/generate-library.test.js
+      - .github/workflows/test-generator.yml
+  pull_request:
+    paths:
+      - tools/generate-library.js
+      - tools/generate-library.test.js
+      - .github/workflows/test-generator.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Run generator tests
+        run: node --test tools/generate-library.test.js
