@@ -66,6 +66,13 @@ M1 — Basic Generator — COMPLETE
 - automated tests: 7/7 PASS
 - end-to-end run on repository content: PASS
 
+## Local testing setup
+- Added `tools/local-check.cmd` for Generator tests + local generation
+- Added `tools/update-and-preview.cmd` for `git pull` + tests + generation + browser preview
+- Added `tools/dev-server.js` as a zero-dependency local HTTP server
+- Local preview URL: `http://127.0.0.1:8080/`
+- Requires Git + Node.js only
+
 ## Deployment
 GitHub Pages workflow is configured and active.
 
