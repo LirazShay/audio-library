@@ -21,12 +21,13 @@ M1 — Basic Generator
 - Acceptance Criteria / Definition of Done
 - Production / Release Checklist
 - M0 — Project Skeleton
+- M1.1 — Generator scanner foundation
 
 ## Current repository layout
 
 ```text
 /
-├── src/                         # deployed runtime site
+├── src/
 │   ├── index.html
 │   ├── 404.html
 │   ├── app/
@@ -34,8 +35,9 @@ M1 — Basic Generator
 │   ├── content/
 │   ├── data/
 │   └── config/
-├── tools/                       # generator and development tools
-├── docs/                        # project documentation
+├── tools/
+│   └── generate-library.js
+├── docs/
 ├── .github/workflows/
 │   └── deploy-pages.yml
 ├── CURRENT-STATUS.md
@@ -43,42 +45,51 @@ M1 — Basic Generator
 └── .gitignore
 ```
 
-## M0 result
-- Static site entry point moved to `src/index.html`
-- Preact + HTM + Signals loaded through pinned Import Map URLs
-- Browser-native ES Modules
-- Source code organized under `src/app/`
-- Plain CSS organized under `src/styles/`
-- Runtime content is under `src/content/`
-- Generated runtime data is under `src/data/`
-- Runtime configuration has a dedicated `src/config/` directory
-- Generator/development tooling remains outside the deployed site under `tools/`
-- GitHub Pages workflow publishes only `src/`
-- No Backend
-- No mandatory Build step
+## M1.1 result
+- Added `tools/generate-library.js`
+- Input path is `src/content/`
+- Future output path is `src/data/library.json`
+- Recursive directory scan implemented
+- Supported audio extensions recognized case-insensitively:
+  - mp3
+  - m4a
+  - aac
+  - ogg
+  - oga
+  - opus
+  - webm
+  - wav
+  - flac
+- TXT files are recognized
+- Irrelevant files are classified as ignored
+- Natural sorting implemented with numeric awareness
+- Portable relative paths use forward slashes
+- Summary counts directories/audio/text/ignored files
+- Scanner uses Node built-ins only
+- Critical scan failure returns process exit code 2
+
+## M1.1 verification
+Tested with temporary nested content containing:
+- Hebrew directory names
+- nested directories
+- uppercase audio extensions
+- MP3/M4A/OPUS/WAV/FLAC classification
+- TXT files
+- irrelevant files
+- numeric names such as 2 and 10
+
+Result:
+- recursive scan succeeded
+- case-insensitive audio detection succeeded
+- natural numeric ordering succeeded
+- ignored-file classification succeeded
 
 ## Deployment
-- Workflow exists at `.github/workflows/deploy-pages.yml`
-- The workflow is triggered on pushes to `main`
-- GitHub Pages itself still requires one-time repository enablement with source set to GitHub Actions
-- Until that repository setting is enabled, the Pages workflow fails at the GitHub Pages configuration step
-
-## Verification
-- No root `index.html`
-- No root `404.html`
-- No root `content/`
-- No root `data/`
-- Runtime and deployment files are isolated under `src/`
-- Technical documentation has been amended to reflect the `src/` deployment layout
+GitHub Pages workflow is configured and has deployed successfully after Pages was enabled.
 
 ## Next
-1. Enable GitHub Pages once in repository Settings → Pages → Source: GitHub Actions.
-2. Re-run or trigger the Pages workflow.
-3. Continue with M1 — Basic Generator using `src/content/` as input and `src/data/library.json` as output.
+M1.2 — convert scanned folders/files into the logical Topic/Track model, including same-basename Audio ↔ TXT matching and duplicate-basename validation.
 
 ## Working rule
-GitHub is the source of truth. Each milestone should end with:
-1. implementation complete,
-2. milestone checks complete,
-3. `CURRENT-STATUS.md` updated,
-4. commit/PR state clear before moving to the next milestone.
+"Continue to the next stage" advances one logical unit of work, which may be a sub-stage of a milestone rather than the whole milestone.
+GitHub is the source of truth.
