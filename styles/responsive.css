@@ -1,0 +1,9 @@
+@media (min-width: 48rem) {
+  .app-shell {
+    padding-block: var(--space-12);
+  }
+
+  .welcome-card {
+    padding: var(--space-12);
+  }
+}
