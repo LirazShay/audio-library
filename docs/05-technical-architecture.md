@@ -4,6 +4,8 @@
 **מבוסס על:** מסמך דרישות מוצר 1.0 + אפיון פונקציונלי 1.0 + מודל התוכן וה־Generator 1.0 + אפיון UX/UI 1.0  
 **מטרת המסמך:** להגדיר ארכיטקטורה פשוטה, ברורה ויציבה לאתר ספריית השמע — 100% Client-Side, ללא Backend וללא Build מסובך.
 
+> **עדכון מבנה Deployment:** קבצי ה-Runtime של האתר נמצאים תחת `/src` בלבד. `src/index.html`, `src/app`, `src/styles`, `src/content`, `src/data` ו-`src/config` הם עץ האתר שנפרס. `tools/`, `docs/` וקבצי ניהול נשארים מחוץ לאתר. GitHub Actions מפרסם ל-GitHub Pages רק את תוכן `src/`. בכל דוגמה ישנה במסמך שמציגה `/content`, `/data/library.json`, `/app`, `/styles` או `/index.html` ברוט של ה-repository, יש לקרוא אותם בהתאמה כ-`/src/content`, `/src/data/library.json`, `/src/app`, `/src/styles` ו-`/src/index.html`.
+
 ---
 
 # 1. עקרון הארכיטקטורה
