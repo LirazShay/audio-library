@@ -7,11 +7,13 @@ on:
     paths:
       - tools/generate-library.js
       - tools/generate-library.test.js
+      - src/content/**
       - .github/workflows/test-generator.yml
   pull_request:
     paths:
       - tools/generate-library.js
       - tools/generate-library.test.js
+      - src/content/**
       - .github/workflows/test-generator.yml
   workflow_dispatch:
 
@@ -28,3 +30,11 @@ jobs:
 
       - name: Run generator tests
         run: node --test tools/generate-library.test.js
+
+      - name: Run generator end-to-end
+        run: |
+          node tools/generate-library.js
+          cp src/data/library.json /tmp/library-first.json
+          node tools/generate-library.js
+          node -e "const fs=require('node:fs'); const assert=require('node:assert/strict'); const first=JSON.parse(fs.readFileSync('/tmp/library-first.json','utf8')); const second=JSON.parse(fs.readFileSync('src/data/library.json','utf8')); delete first.generatedAt; delete second.generatedAt; assert.deepEqual(first,second); if(second.schemaVersion!==1||second.root?.id!=='root') throw new Error('Invalid library envelope');"
+          cat src/data/library.json
