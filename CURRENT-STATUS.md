@@ -7,7 +7,7 @@ Audio Library
 Implementation in progress.
 
 ## Current milestone
-M1 — Basic Generator — COMPLETE
+M2 — Library Loader
 
 ## Completed
 - Product Requirements
@@ -21,63 +21,34 @@ M1 — Basic Generator — COMPLETE
 - Acceptance Criteria / Definition of Done
 - Production / Release Checklist
 - M0 — Project Skeleton
-- M1.1 — Generator scanner foundation
-- M1.2 — Topic/Track model builder and Audio/TXT matching
-- M1.3 — deterministic IDs and library document envelope
-- M1.4 — atomic library writer and final generator summary
-- M1.5 — automated Generator test coverage and CI
-- M1.6 — end-to-end generation on real repository content
+- M1 — Basic Generator
+- M2.1 — single-load Library fetch, validation, app state, and basic UI status
 
-## M1.6 result
-- Extended Generator CI to run against the real repository `src/content/`
-- Generator was executed twice end-to-end in GitHub Actions
-- Both runs completed successfully
-- Repeat-run comparison passed after excluding the intentionally changing `generatedAt` field
-- Current real content contains only `.gitkeep`, so the generated library is valid and empty
-- Generated output was verified and committed as `src/data/library.json`
-- Removed `src/data/.gitkeep` because the data directory now contains a real runtime file
+## M2.1 result
+- Added `src/app/services/library-service.js`
+- Library URL is resolved relative to the module and points to `src/data/library.json` at runtime
+- `loadLibrary()` caches the same Promise so the library is loaded only once per page session
+- Loaded document is retained in memory and exposed through `getLoadedLibrary()`
+- Validates `schemaVersion === 1`
+- Validates `site.name`
+- Validates root object, root type/id, and `root.children`
+- HTTP failures and invalid documents reject with controlled errors
+- Added `src/app/state/app-state.js` with `loading`, `ready`, and `error` state
+- Application initialization happens once from `main.js`
+- App now shows loading, success, or error state
+- Site title is read from `library.site.name` after load instead of remaining permanently hard-coded in the UI
+- Success state currently shows the number of root-level items only; topic/track indexes are intentionally deferred
 
-## End-to-end result
-- Directories scanned: 0
-- Audio files scanned: 0
-- Text files scanned: 0
-- Ignored files: 1 (`.gitkeep`)
-- Topics: 0
-- Tracks: 0
-- Warnings: 0
-- Errors: 0
-- Output: `src/data/library.json`
-
-## M1 Definition of Done
-- Generator runs with one Node command: PASS
-- Recursive scanning: PASS
-- Folder → Topic: PASS
-- Audio → Track: PASS
-- same-name TXT → embedded text: PASS
-- Natural Sort: PASS
-- relative runtime paths: PASS
-- deterministic path-derived IDs: PASS
-- `schemaVersion`: PASS
-- `generatedAt`: PASS
-- Pretty JSON: PASS
-- Atomic write: PASS
-- warnings/errors: PASS
-- repeated runs preserve structure and IDs: PASS
-- automated tests: 7/7 PASS
-- end-to-end run on repository content: PASS
-
-## Local testing setup
-- Added `tools/local-check.cmd` for Generator tests + local generation
-- Added `tools/update-and-preview.cmd` for `git pull` + tests + generation + browser preview
-- Added `tools/dev-server.js` as a zero-dependency local HTTP server
-- Local preview URL: `http://127.0.0.1:8080/`
-- Requires Git + Node.js only
-
-## Deployment
-GitHub Pages workflow is configured and active.
+## M2.1 verification
+- GitHub Pages deployment completed successfully after the M2.1 code changes
+- Added `.github/workflows/test-app.yml`
+- Browser ES-module syntax checks: PASS
+- Current `src/data/library.json` validation: PASS
+- Unsupported `schemaVersion` rejection test: PASS
+- Test App workflow: PASS
 
 ## Next
-M2 — Library Loader. First sub-stage should load and validate `src/data/library.json` once in the browser and expose a minimal in-memory library model.
+M2.2 — build the in-memory indexes (`tracksById`, `topicsById`) and expose `getRoot()`, `getTopic(id)`, `getTrack(id)`, `getAllTracks()`, and `getAllTopics()` without adding routing or content pages yet.
 
 ## Working rule
 "Continue to the next stage" advances one logical unit of work, which may be a sub-stage of a milestone rather than the whole milestone.
