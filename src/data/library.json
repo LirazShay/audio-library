@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-09-18T14:34:44.108Z",
+  "site": {
+    "name": "ספריית השמע"
+  },
+  "root": {
+    "type": "topic",
+    "id": "root",
+    "name": "ספריית השמע",
+    "path": "",
+    "children": []
+  }
+}
