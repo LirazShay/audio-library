@@ -25,36 +25,37 @@ M1 — Basic Generator
 - M1.2 — Topic/Track model builder and Audio/TXT matching
 - M1.3 — deterministic IDs and library document envelope
 - M1.4 — atomic library writer and final generator summary
+- M1.5 — automated Generator test coverage and CI
 
-## M1.4 result
-- Added atomic output writing for `src/data/library.json`
-- Output directory is created automatically when needed
-- Generator writes to a unique temporary file in the same directory
-- Temporary JSON is read back and parsed before replacement
-- `schemaVersion` and `root` are checked before replacement
-- Final replacement uses `rename` only after validation succeeds
-- Temporary files are removed in a `finally` block
-- A failed generation/write leaves the previous `library.json` untouched
-- Local content errors still allow the valid remainder of the library to be written and return exit code 1
-- Critical generator failures return exit code 2
-- Final console output now includes the generated output path and completion state
+## M1.5 result
+- Added `tools/generate-library.test.js` using Node's built-in `node:test`
+- Added `.github/workflows/test-generator.yml`
+- Generator tests run automatically on relevant pushes and pull requests
+- No external test framework or npm dependency was added
+- `writeLibraryFile` now accepts an optional output path so atomic-write behavior can be tested safely outside runtime data
 
-## M1.4 verification
-Verified against the committed source:
-- temporary write exists
-- read-back JSON validation exists
-- envelope validation exists
-- final rename happens after validation
-- temporary cleanup exists
-- exit code 1 is preserved for local content errors
-- exit code 2 is preserved for critical failures
-- writer is exported for later tests
+## Automated tests
+GitHub Actions run completed successfully.
+
+Coverage:
+1. recursive nested scan with Hebrew names and uppercase audio extensions
+2. natural numeric ordering (`1`, `2`, `10`)
+3. stable path-derived deterministic IDs
+4. Audio ↔ TXT matching and CRLF/CR → LF normalization
+5. orphan TXT warning without Track creation
+6. duplicate Audio basename error and ambiguous Track exclusion
+7. atomic output replacement plus preservation of previous output after validation failure
+
+Result:
+- tests: 7
+- pass: 7
+- fail: 0
 
 ## Deployment
 GitHub Pages workflow is configured and active.
 
 ## Next
-M1.5 — add focused Generator tests/fixtures for recursive content, stable IDs, natural ordering, Audio/TXT matching, orphan TXT, duplicate basenames, and atomic-write failure behavior; then decide whether M1 is complete.
+M1.6 — run the complete Generator end-to-end against the repository's real `src/content/`, create/verify `src/data/library.json`, verify repeat-run stability of IDs and final CLI behavior, then close M1 if its Definition of Done is satisfied.
 
 ## Working rule
 "Continue to the next stage" advances one logical unit of work, which may be a sub-stage of a milestone rather than the whole milestone.
