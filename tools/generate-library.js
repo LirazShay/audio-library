@@ -1,9 +1,13 @@
 const fs = require("node:fs/promises");
 const path = require("node:path");
+const crypto = require("node:crypto");
 
 const REPOSITORY_ROOT = path.resolve(__dirname, "..");
 const CONTENT_DIRECTORY = path.join(REPOSITORY_ROOT, "src", "content");
 const OUTPUT_FILE = path.join(REPOSITORY_ROOT, "src", "data", "library.json");
+
+const SCHEMA_VERSION = 1;
+const DEFAULT_SITE_NAME = "ספריית השמע";
 
 const AUDIO_EXTENSIONS = new Set([
   ".mp3",
@@ -34,8 +38,23 @@ function toPortablePath(value) {
   return value.split(path.sep).join("/");
 }
 
+function normalizePathForId(value) {
+  return toPortablePath(value).normalize("NFC");
+}
+
 function normalizeBasename(fileName) {
   return path.basename(fileName, path.extname(fileName)).normalize("NFC");
+}
+
+function createDeterministicId(type, relativePath) {
+  const normalizedPath = normalizePathForId(relativePath);
+  const hash = crypto
+    .createHash("sha256")
+    .update(`${type}:${normalizedPath}`, "utf8")
+    .digest("hex")
+    .slice(0, 12);
+
+  return `${type}_${hash}`;
 }
 
 function sortEntriesNaturally(entries) {
@@ -196,6 +215,7 @@ async function buildTrack(audioItem, textItem, diagnostics) {
 
   return {
     type: "track",
+    id: createDeterministicId("track", audioItem.relativePath),
     title,
     audio: toRuntimeContentPath(audioItem.relativePath),
     format: audioItem.extension.slice(1),
@@ -256,6 +276,7 @@ async function buildTopic(name, relativePath, items, diagnostics) {
 
   return {
     type: "topic",
+    id: relativePath === "" ? "root" : createDeterministicId("topic", relativePath),
     name,
     path: toPortablePath(relativePath),
     children,
@@ -264,12 +285,27 @@ async function buildTopic(name, relativePath, items, diagnostics) {
 
 async function buildLibraryModel(items) {
   const diagnostics = createDiagnostics();
-  const root = await buildTopic(null, "", items, diagnostics);
+  const root = await buildTopic(DEFAULT_SITE_NAME, "", items, diagnostics);
 
   return {
     root,
     diagnostics,
   };
+}
+
+function createLibraryDocument(root, generatedAt = new Date().toISOString()) {
+  return {
+    schemaVersion: SCHEMA_VERSION,
+    generatedAt,
+    site: {
+      name: DEFAULT_SITE_NAME,
+    },
+    root,
+  };
+}
+
+function serializeLibraryDocument(document) {
+  return `${JSON.stringify(document, null, 2)}\n`;
 }
 
 function collectModelStats(root) {
@@ -327,11 +363,18 @@ async function main() {
     const items = await scanContent();
     const scanStats = collectStats(items);
     const { root, diagnostics } = await buildLibraryModel(items);
+    const document = createLibraryDocument(root);
+    const serialized = serializeLibraryDocument(document);
     const modelStats = collectModelStats(root);
 
-    console.log("Audio Library Generator — model builder");
+    JSON.parse(serialized);
+
+    console.log("Audio Library Generator — document builder");
     console.log(`Content: ${toPortablePath(path.relative(REPOSITORY_ROOT, CONTENT_DIRECTORY))}`);
     console.log(`Future output: ${toPortablePath(path.relative(REPOSITORY_ROOT, OUTPUT_FILE))}`);
+    console.log(`Schema version: ${document.schemaVersion}`);
+    console.log(`Generated at: ${document.generatedAt}`);
+    console.log(`Site: ${document.site.name}`);
     console.log("");
     console.log(`Directories scanned: ${scanStats.directories}`);
     console.log(`Audio files scanned: ${scanStats.audioFiles}`);
@@ -354,7 +397,7 @@ async function main() {
       process.exitCode = 1;
     }
   } catch (error) {
-    console.error("ERROR: unable to scan content directory.");
+    console.error("ERROR: unable to build library document.");
     console.error(error instanceof Error ? error.message : String(error));
     process.exitCode = 2;
   }
@@ -367,7 +410,9 @@ if (require.main === module) {
 module.exports = {
   AUDIO_EXTENSIONS,
   CONTENT_DIRECTORY,
+  DEFAULT_SITE_NAME,
   OUTPUT_FILE,
+  SCHEMA_VERSION,
   addError,
   addWarning,
   buildLibraryModel,
@@ -375,12 +420,16 @@ module.exports = {
   classifyFile,
   collectModelStats,
   collectStats,
+  createDeterministicId,
   createDiagnostics,
+  createLibraryDocument,
   groupFilesByBasename,
   normalizeBasename,
+  normalizePathForId,
   normalizeTextLineEndings,
   scanContent,
   scanDirectory,
+  serializeLibraryDocument,
   sortEntriesNaturally,
   toPortablePath,
   toRuntimeContentPath,
