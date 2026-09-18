@@ -4,10 +4,10 @@
 Audio Library
 
 ## Current phase
-Planning complete.
+Implementation in progress.
 
 ## Current milestone
-M0 — Project Skeleton
+M1 — Basic Generator
 
 ## Completed
 - Product Requirements
@@ -20,15 +20,31 @@ M0 — Project Skeleton
 - Test Plan
 - Acceptance Criteria / Definition of Done
 - Production / Release Checklist
+- M0 — Project Skeleton
 
-## Implementation
-Not started yet.
+## M0 result
+- Static `index.html` with `lang="he"` and `dir="rtl"`
+- Preact + HTM + Signals loaded through pinned Import Map URLs
+- Browser-native ES Modules
+- `app/main.js` bootstrap
+- `app/app.js` minimal application shell
+- Plain CSS split into variables/base/layout/components/responsive
+- `content/`, `data/`, and `tools/` initialized
+- No Backend
+- No mandatory Build step
+- README includes local static-server instructions
+
+## M0 verification
+- Required M0 repository files are present
+- Repository structure matches the planned M0 skeleton
+- Changes were committed atomically to `main`
+- No M1 functionality was added
 
 ## Known issues
-None.
+- Browser runtime smoke test still needs a served URL (local static server or GitHub Pages). GitHub Pages deployment is formally planned for M17.
 
 ## Next
-Start M0 according to `docs/07-development-plan.md`.
+Implement M1 — Basic Generator according to `docs/07-development-plan.md` and `docs/03-content-generator-spec.md`.
 
 ## Working rule
 GitHub is the source of truth. Each milestone should end with:
