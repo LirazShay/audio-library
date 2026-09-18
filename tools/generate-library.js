@@ -308,6 +308,31 @@ function serializeLibraryDocument(document) {
   return `${JSON.stringify(document, null, 2)}\n`;
 }
 
+async function writeLibraryFile(serialized) {
+  const outputDirectory = path.dirname(OUTPUT_FILE);
+  const temporaryFile = path.join(
+    outputDirectory,
+    `.${path.basename(OUTPUT_FILE)}.${process.pid}.${crypto.randomUUID()}.tmp`
+  );
+
+  await fs.mkdir(outputDirectory, { recursive: true });
+
+  try {
+    await fs.writeFile(temporaryFile, serialized, "utf8");
+
+    const writtenContent = await fs.readFile(temporaryFile, "utf8");
+    const parsed = JSON.parse(writtenContent);
+
+    if (parsed.schemaVersion !== SCHEMA_VERSION || !parsed.root) {
+      throw new Error("Generated library document failed validation.");
+    }
+
+    await fs.rename(temporaryFile, OUTPUT_FILE);
+  } finally {
+    await fs.rm(temporaryFile, { force: true });
+  }
+}
+
 function collectModelStats(root) {
   const stats = {
     topics: 0,
@@ -368,8 +393,9 @@ async function main() {
     const modelStats = collectModelStats(root);
 
     JSON.parse(serialized);
+    await writeLibraryFile(serialized);
 
-    console.log("Audio Library Generator — document builder");
+    console.log("Audio Library Generator — generation complete");
     console.log(`Content: ${toPortablePath(path.relative(REPOSITORY_ROOT, CONTENT_DIRECTORY))}`);
     console.log(`Future output: ${toPortablePath(path.relative(REPOSITORY_ROOT, OUTPUT_FILE))}`);
     console.log(`Schema version: ${document.schemaVersion}`);
@@ -387,6 +413,10 @@ async function main() {
     console.log(`Tracks without text: ${modelStats.tracksWithoutText}`);
     console.log(`Warnings: ${diagnostics.warnings.length}`);
     console.log(`Errors: ${diagnostics.errors.length}`);
+    console.log("");
+    console.log(
+      `Output: ${toPortablePath(path.relative(REPOSITORY_ROOT, OUTPUT_FILE))}`
+    );
 
     if (diagnostics.warnings.length > 0 || diagnostics.errors.length > 0) {
       console.log("");
@@ -394,10 +424,15 @@ async function main() {
     }
 
     if (diagnostics.errors.length > 0) {
+      console.log("");
+      console.log("Generation completed with content errors.");
       process.exitCode = 1;
+    } else {
+      console.log("");
+      console.log("Library generation complete.");
     }
   } catch (error) {
-    console.error("ERROR: unable to build library document.");
+    console.error("ERROR: unable to generate library.");
     console.error(error instanceof Error ? error.message : String(error));
     process.exitCode = 2;
   }
@@ -433,4 +468,5 @@ module.exports = {
   sortEntriesNaturally,
   toPortablePath,
   toRuntimeContentPath,
+  writeLibraryFile,
 };
