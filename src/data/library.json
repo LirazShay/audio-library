@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-09-18T14:34:44.108Z",
+  "generatedAt": "2026-09-18T14:43:02.416Z",
   "site": {
     "name": "ספריית השמע"
   },
@@ -9,6 +9,63 @@
     "id": "root",
     "name": "ספריית השמע",
     "path": "",
-    "children": []
+    "children": [
+      {
+        "type": "topic",
+        "id": "topic_31d1a99b7314",
+        "name": "נושא לדוגמה 1",
+        "path": "נושא לדוגמה 1",
+        "children": [
+          {
+            "type": "topic",
+            "id": "topic_f2ba0dd23f49",
+            "name": "תת נושא",
+            "path": "נושא לדוגמה 1/תת נושא",
+            "children": [
+              {
+                "type": "track",
+                "id": "track_37ccb09f6f7f",
+                "title": "01 - קטע פנימי",
+                "audio": "content/נושא לדוגמה 1/תת נושא/01 - קטע פנימי.wav",
+                "format": "wav",
+                "text": "טקסט לדוגמה מתוך תת נושא.\n"
+              }
+            ]
+          },
+          {
+            "type": "track",
+            "id": "track_66847e1206e2",
+            "title": "01 - פתיחה",
+            "audio": "content/נושא לדוגמה 1/01 - פתיחה.wav",
+            "format": "wav",
+            "text": "זהו טקסט לדוגמה לקטע הראשון.\nשורה נוספת לבדיקת תצוגת טקסט.\n"
+          },
+          {
+            "type": "track",
+            "id": "track_a8d11bde7350",
+            "title": "02 - קטע בלי טקסט",
+            "audio": "content/נושא לדוגמה 1/02 - קטע בלי טקסט.wav",
+            "format": "wav",
+            "text": null
+          }
+        ]
+      },
+      {
+        "type": "topic",
+        "id": "topic_171a0cb664b7",
+        "name": "נושא לדוגמה 2",
+        "path": "נושא לדוגמה 2",
+        "children": [
+          {
+            "type": "track",
+            "id": "track_447190172e17",
+            "title": "01 - בדיקה",
+            "audio": "content/נושא לדוגמה 2/01 - בדיקה.wav",
+            "format": "wav",
+            "text": "קטע נוסף שנועד לבדיקת הספרייה והנגן.\n"
+          }
+        ]
+      }
+    ]
   }
 }
