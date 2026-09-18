@@ -308,11 +308,11 @@ function serializeLibraryDocument(document) {
   return `${JSON.stringify(document, null, 2)}\n`;
 }
 
-async function writeLibraryFile(serialized) {
-  const outputDirectory = path.dirname(OUTPUT_FILE);
+async function writeLibraryFile(serialized, outputFile = OUTPUT_FILE) {
+  const outputDirectory = path.dirname(outputFile);
   const temporaryFile = path.join(
     outputDirectory,
-    `.${path.basename(OUTPUT_FILE)}.${process.pid}.${crypto.randomUUID()}.tmp`
+    `.${path.basename(outputFile)}.${process.pid}.${crypto.randomUUID()}.tmp`
   );
 
   await fs.mkdir(outputDirectory, { recursive: true });
@@ -327,7 +327,7 @@ async function writeLibraryFile(serialized) {
       throw new Error("Generated library document failed validation.");
     }
 
-    await fs.rename(temporaryFile, OUTPUT_FILE);
+    await fs.rename(temporaryFile, outputFile);
   } finally {
     await fs.rm(temporaryFile, { force: true });
   }
