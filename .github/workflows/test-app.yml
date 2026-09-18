@@ -1,0 +1,43 @@
+name: Test App
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - src/app/**
+      - src/data/library.json
+      - .github/workflows/test-app.yml
+  pull_request:
+    paths:
+      - src/app/**
+      - src/data/library.json
+      - .github/workflows/test-app.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Check browser module syntax
+        run: |
+          cp src/app/services/library-service.js /tmp/library-service.mjs
+          cp src/app/state/app-state.js /tmp/app-state.mjs
+          cp src/app/main.js /tmp/main.mjs
+          cp src/app/app.js /tmp/app.mjs
+          node --check /tmp/library-service.mjs
+          node --check /tmp/app-state.mjs
+          node --check /tmp/main.mjs
+          node --check /tmp/app.mjs
+
+      - name: Validate current library document
+        run: |
+          cp src/app/services/library-service.js /tmp/library-service.mjs
+          node --input-type=module -e "import fs from 'node:fs'; import assert from 'node:assert/strict'; const m=await import('file:///tmp/library-service.mjs'); const doc=JSON.parse(fs.readFileSync('src/data/library.json','utf8')); assert.equal(m.validateLibraryDocument(doc),doc); assert.throws(()=>m.validateLibraryDocument({...doc,schemaVersion:999}),/Unsupported library schemaVersion/);"
