@@ -11,14 +11,33 @@
 2. `docs/07-development-plan.md`
 3. את מסמכי האפיון הרלוונטיים לשלב
 
+## מבנה בסיסי
+
+```text
+/
+├── src/                  # כל מה שנפרס לאתר
+│   ├── index.html
+│   ├── 404.html
+│   ├── app/
+│   ├── styles/
+│   ├── content/
+│   ├── data/
+│   └── config/
+├── tools/                # כלי פיתוח ו-Generator
+├── docs/                 # מסמכי הפרויקט
+├── .github/workflows/    # Deployment
+├── CURRENT-STATUS.md
+└── README.md
+```
+
 ## הפעלה מקומית
 
 האתר הוא Static Web App ללא Build.
 
-מתיקיית הפרויקט אפשר להפעיל שרת סטטי פשוט, למשל:
+מתיקיית הפרויקט:
 
 ```bash
-python -m http.server 8080
+python -m http.server 8080 --directory src
 ```
 
 ואז לפתוח:
@@ -27,7 +46,37 @@ python -m http.server 8080
 http://localhost:8080/
 ```
 
-אין להפעיל את `index.html` ישירות דרך `file://`, משום שהפרויקט משתמש ב־ES Modules ויטען בהמשך נתונים באמצעות `fetch`.
+אין להפעיל את `src/index.html` ישירות דרך `file://`.
+
+## Deployment
+
+GitHub Pages נפרס באמצעות GitHub Actions.
+
+ה־workflow:
+
+```text
+.github/workflows/deploy-pages.yml
+```
+
+מפרסם רק את:
+
+```text
+src/
+```
+
+לכן `docs/`, `tools/`, `CURRENT-STATUS.md` ושאר קבצי הפיתוח אינם חלק מהאתר שנפרס.
+
+## Runtime data
+
+קבצי Runtime נשמרים בתוך `src/`:
+
+```text
+src/content/   # קבצי שמע וטקסט
+src/data/      # JSON שנוצר, למשל library.json
+src/config/    # הגדרות Runtime של האתר
+```
+
+אין JSON Runtime ברוט של ה־repository.
 
 ## טכנולוגיות בסיס
 
@@ -43,7 +92,7 @@ http://localhost:8080/
 - Static client-side web app
 - GitHub Pages
 - תוכן מתוך תיקיות וקבצי שמע/TXT
-- Generator ייצור `data/library.json`
+- Generator ייצור `src/data/library.json`
 - ללא Backend בגרסה הראשונה
 - ללא Build מורכב
 - פיתוח לפי Milestones
