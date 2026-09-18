@@ -7,7 +7,7 @@ Audio Library
 Implementation in progress.
 
 ## Current milestone
-M1 — Basic Generator
+M1 — Basic Generator — COMPLETE
 
 ## Completed
 - Product Requirements
@@ -26,36 +26,51 @@ M1 — Basic Generator
 - M1.3 — deterministic IDs and library document envelope
 - M1.4 — atomic library writer and final generator summary
 - M1.5 — automated Generator test coverage and CI
+- M1.6 — end-to-end generation on real repository content
 
-## M1.5 result
-- Added `tools/generate-library.test.js` using Node's built-in `node:test`
-- Added `.github/workflows/test-generator.yml`
-- Generator tests run automatically on relevant pushes and pull requests
-- No external test framework or npm dependency was added
-- `writeLibraryFile` now accepts an optional output path so atomic-write behavior can be tested safely outside runtime data
+## M1.6 result
+- Extended Generator CI to run against the real repository `src/content/`
+- Generator was executed twice end-to-end in GitHub Actions
+- Both runs completed successfully
+- Repeat-run comparison passed after excluding the intentionally changing `generatedAt` field
+- Current real content contains only `.gitkeep`, so the generated library is valid and empty
+- Generated output was verified and committed as `src/data/library.json`
+- Removed `src/data/.gitkeep` because the data directory now contains a real runtime file
 
-## Automated tests
-GitHub Actions run completed successfully.
+## End-to-end result
+- Directories scanned: 0
+- Audio files scanned: 0
+- Text files scanned: 0
+- Ignored files: 1 (`.gitkeep`)
+- Topics: 0
+- Tracks: 0
+- Warnings: 0
+- Errors: 0
+- Output: `src/data/library.json`
 
-Coverage:
-1. recursive nested scan with Hebrew names and uppercase audio extensions
-2. natural numeric ordering (`1`, `2`, `10`)
-3. stable path-derived deterministic IDs
-4. Audio ↔ TXT matching and CRLF/CR → LF normalization
-5. orphan TXT warning without Track creation
-6. duplicate Audio basename error and ambiguous Track exclusion
-7. atomic output replacement plus preservation of previous output after validation failure
-
-Result:
-- tests: 7
-- pass: 7
-- fail: 0
+## M1 Definition of Done
+- Generator runs with one Node command: PASS
+- Recursive scanning: PASS
+- Folder → Topic: PASS
+- Audio → Track: PASS
+- same-name TXT → embedded text: PASS
+- Natural Sort: PASS
+- relative runtime paths: PASS
+- deterministic path-derived IDs: PASS
+- `schemaVersion`: PASS
+- `generatedAt`: PASS
+- Pretty JSON: PASS
+- Atomic write: PASS
+- warnings/errors: PASS
+- repeated runs preserve structure and IDs: PASS
+- automated tests: 7/7 PASS
+- end-to-end run on repository content: PASS
 
 ## Deployment
 GitHub Pages workflow is configured and active.
 
 ## Next
-M1.6 — run the complete Generator end-to-end against the repository's real `src/content/`, create/verify `src/data/library.json`, verify repeat-run stability of IDs and final CLI behavior, then close M1 if its Definition of Done is satisfied.
+M2 — Library Loader. First sub-stage should load and validate `src/data/library.json` once in the browser and expose a minimal in-memory library model.
 
 ## Working rule
 "Continue to the next stage" advances one logical unit of work, which may be a sub-stage of a milestone rather than the whole milestone.
