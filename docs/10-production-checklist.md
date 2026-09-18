@@ -4,6 +4,8 @@
 **מבוסס על:** כל מסמכי האפיון, הפיתוח, הבדיקות וה־Acceptance של הפרויקט  
 **מטרת המסמך:** לספק Checklist מעשי, קצר יחסית אך מקיף, לביצוע לפני כל Release, בזמן העלייה ולאחריה — כדי לוודא שהגרסה שנפרסת ל־Production אכן מוכנה.
 
+> **עדכון מבנה Deployment:** קבצי ה-Runtime של האתר נמצאים תחת `/src` בלבד. `src/index.html`, `src/app`, `src/styles`, `src/content`, `src/data` ו-`src/config` הם עץ האתר שנפרס. `tools/`, `docs/` וקבצי ניהול נשארים מחוץ לאתר. GitHub Actions מפרסם ל-GitHub Pages רק את תוכן `src/`. בכל דוגמה ישנה במסמך שמציגה `/content`, `/data/library.json`, `/app`, `/styles` או `/index.html` ברוט של ה-repository, יש לקרוא אותם בהתאמה כ-`/src/content`, `/src/data/library.json`, `/src/app`, `/src/styles` ו-`/src/index.html`.
+
 ---
 
 # 1. עקרון מרכזי
