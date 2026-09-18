@@ -48,6 +48,68 @@ http://localhost:8080/
 
 אין להפעיל את `src/index.html` ישירות דרך `file://`.
 
+
+## בדיקה מקומית ב-Windows
+
+נוספו כלי בדיקה מקומיים תחת `tools/`.
+
+### בדיקת Generator בלבד
+
+אפשר ללחוץ פעמיים על:
+
+```text
+tools/local-check.cmd
+```
+
+הסקריפט:
+
+1. מריץ את כל בדיקות ה-Generator.
+2. מריץ את ה-Generator על `src/content/`.
+3. מעדכן את `src/data/library.json`.
+4. עוצר ומציג שגיאה אם בדיקה או פעולה קריטית נכשלו.
+
+### הורדה מ-GitHub + בדיקה + Preview בדפדפן
+
+אפשר ללחוץ פעמיים על:
+
+```text
+tools/update-and-preview.cmd
+```
+
+הסקריפט מבצע:
+
+```text
+git pull --ff-only
+        ↓
+Generator tests
+        ↓
+Generate library.json
+        ↓
+Local Node HTTP server
+        ↓
+Open http://127.0.0.1:8080/
+```
+
+נדרש רק:
+
+- Git
+- Node.js
+
+אין צורך ב-Python, npm install או חבילת שרת חיצונית.
+
+השרת המקומי הוא:
+
+```text
+tools/dev-server.js
+```
+
+וניתן גם להריץ אותו ידנית:
+
+```bash
+node tools/dev-server.js
+```
+
+
 ## Deployment
 
 GitHub Pages נפרס באמצעות GitHub Actions.
