@@ -23,6 +23,7 @@ M2 — Library Loader — IN PROGRESS
 - M0 — Project Skeleton
 - M1 — Basic Generator
 - M2.1 — single-load library fetch, envelope validation, and app loading state
+- M2.2 — recursive in-memory Topic/Track indexes and lookup API
 
 ## M2.1 result
 - `library.json` is fetched through `src/app/services/library-service.js`
@@ -55,6 +56,40 @@ Result:
 - pass: 6
 - fail: 0
 
+## M2.2 result
+- Added recursive in-memory `topicsById` and `tracksById` Maps
+- Root topic is indexed under `root`
+- Added `getRoot()`
+- Added `getTopic(id)`
+- Added `getTrack(id)`
+- Added `getAllTopics()`
+- Added `getAllTracks()`
+- `getAllTopics()` excludes the logical root and preserves JSON traversal order
+- `getAllTracks()` preserves JSON traversal order
+- Unknown IDs return `null`
+- Before library load, root/lookups return `null` and collection APIs return empty arrays
+- Duplicate Topic IDs are rejected during index construction
+- Unsupported node types are rejected during index construction
+- Indexes are built once when the single library load succeeds
+
+## M2.2 automated verification
+GitHub Actions `Test App` completed successfully.
+
+Library Service result:
+- tests: 9
+- pass: 9
+- fail: 0
+
+New M2.2 coverage:
+- recursive Topic lookup: PASS
+- recursive Track lookup: PASS
+- root lookup: PASS
+- unknown ID behavior: PASS
+- ordered `getAllTopics()`: PASS
+- ordered `getAllTracks()`: PASS
+- duplicate Topic ID rejection: PASS
+- unsupported node rejection: PASS
+
 ## Sample content
 - 2 top-level sample topics
 - 1 nested subtopic
@@ -70,7 +105,8 @@ Result:
 GitHub Pages workflow is configured and active.
 
 ## Next
-M2.2 — build in-memory `topicsById` and `tracksById` Maps and expose `getRoot()`, `getTopic(id)`, `getTrack(id)`, `getAllTopics()`, and `getAllTracks()` without adding routing or content pages.
+M2.3 — use the in-memory Library Service API to show total Topic and Track counts in the basic loaded-state UI, then run the full M2 Definition of Done/regression pass. No routing or content pages yet.
+
 
 ## Working rule
 Each "Continue to the next stage" command advances exactly one M2 sub-stage.
