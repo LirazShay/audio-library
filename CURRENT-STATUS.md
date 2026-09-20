@@ -1,5 +1,39 @@
 # Current Status
 
+## Continuation snapshot
+
+### Cross-chat continuity project
+IN PROGRESS
+
+### Product implementation
+- M0–M7: COMPLETE
+- M8 Mini/global player: NOT STARTED
+
+### Immediate next action
+Complete the cross-chat continuity hardening:
+1. add documentation-contract automated checks/CI
+2. add the canonical ChatGPT Project Instructions document
+3. run the documentation checks
+4. mark this continuity project COMPLETE
+
+### Manual verification still pending
+The latest live-progress + local media Range/restart fixes are automated-test verified, but the user has not yet confirmed in this chat that visible time/percentage now advances correctly in their local browser.
+
+Do not claim that manual incident is closed until the user confirms it.
+
+If it is still broken after a fresh `tools\update-and-preview.cmd` run, follow the diagnostic plan in `docs/14-testing-troubleshooting.md`.
+
+### Cross-chat entry point
+Every new chat starts at:
+
+```text
+AI-START-HERE.md
+```
+
+Then reads this file and the continuity docs listed in `docs/00-project-index.md`.
+
+---
+
 ## Project
 Audio Library
 
