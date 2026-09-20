@@ -13,6 +13,7 @@ on:
       - tools/m3-routing-integration.test.mjs
       - tools/m4-topics.test.mjs
       - tools/m5-tracks.test.mjs
+      - tools/audio-service.test.mjs
       - .github/workflows/test-app.yml
   pull_request:
     paths:
@@ -24,6 +25,7 @@ on:
       - tools/m3-routing-integration.test.mjs
       - tools/m4-topics.test.mjs
       - tools/m5-tracks.test.mjs
+      - tools/audio-service.test.mjs
       - .github/workflows/test-app.yml
   workflow_dispatch:
 
@@ -42,8 +44,10 @@ jobs:
         run: |
           cp src/app/services/library-service.js /tmp/library-service.mjs
           cp src/app/services/router-service.js /tmp/router-service.mjs
+          cp src/app/services/audio-service.js /tmp/audio-service.mjs
           cp src/app/state/app-state.js /tmp/app-state.mjs
           cp src/app/state/router-state.js /tmp/router-state.mjs
+          cp src/app/state/player-state.js /tmp/player-state.mjs
           cp src/app/main.js /tmp/main.mjs
           cp src/app/app.js /tmp/app.mjs
           cp src/app/pages/home-page.js /tmp/home-page.mjs
@@ -55,8 +59,10 @@ jobs:
           cp src/app/components/track-row.js /tmp/track-row.mjs
           node --check /tmp/library-service.mjs
           node --check /tmp/router-service.mjs
+          node --check /tmp/audio-service.mjs
           node --check /tmp/app-state.mjs
           node --check /tmp/router-state.mjs
+          node --check /tmp/player-state.mjs
           node --check /tmp/main.mjs
           node --check /tmp/app.mjs
           node --check /tmp/home-page.mjs
@@ -88,6 +94,13 @@ jobs:
 
       - name: Run M5 Track tests
         run: node --test tools/m5-tracks.test.mjs
+
+      - name: Run Audio Service tests
+        run: node --test tools/audio-service.test.mjs
+
+      - name: Check M6.1 Audio startup wiring
+        run: |
+          node -e "const fs=require('node:fs'); const main=fs.readFileSync('src/app/main.js','utf8'); const state=fs.readFileSync('src/app/state/player-state.js','utf8'); if(!main.includes('initializeAudioService()')) throw new Error('Audio service must initialize once from main.js.'); if(!state.includes('currentTrack = signal(null)') || !state.includes('playerStatus = signal(PLAYER_STATUS.IDLE)')) throw new Error('M6.1 player Signals are missing.');"
 
       - name: Check M3.2 router wiring
         run: |
