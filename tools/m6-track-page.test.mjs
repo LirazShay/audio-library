@@ -64,9 +64,9 @@ test("basic M6 player controls remain touch-friendly and responsive", () => {
   assert.match(componentsCss, /minmax\(0,\s*1fr\)/);
 });
 
-test("M7.1 extraction does not add advanced controls yet", () => {
+test("later player controls preserve the M6 service boundary", () => {
   const combined = `${fullPlayerSource}\n${progressBarSource}`;
 
-  assert.doesNotMatch(combined, /playbackRate|setRate|volume|repeat|visualization|waveform/i);
-  assert.doesNotMatch(combined, /Previous|Next|הקודם|הבא/);
+  assert.doesNotMatch(combined, /getAudioElement|audio\.currentTime|audio\.playbackRate|audio\.volume/);
+  assert.doesNotMatch(combined, /playNext|playPrevious/);
 });
