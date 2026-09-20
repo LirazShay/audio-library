@@ -6,6 +6,7 @@ let loadedLibrary = null;
 let rootTopic = null;
 let topicsById = new Map();
 let tracksById = new Map();
+let parentTopicIdById = new Map();
 let allTopics = [];
 let allTracks = [];
 
@@ -58,10 +59,11 @@ function addUniqueItem(map, item, kind) {
 export function buildLibraryIndexes(root) {
   const nextTopicsById = new Map();
   const nextTracksById = new Map();
+  const nextParentTopicIdById = new Map();
   const nextAllTopics = [];
   const nextAllTracks = [];
 
-  function visit(node, isRoot = false) {
+  function visit(node, isRoot = false, parentTopicId = null) {
     assertObject(node, "Library node must be an object.");
 
     if (node.type === "topic") {
@@ -73,10 +75,14 @@ export function buildLibraryIndexes(root) {
 
       if (!isRoot) {
         nextAllTopics.push(node);
+
+        if (parentTopicId) {
+          nextParentTopicIdById.set(node.id, parentTopicId);
+        }
       }
 
       for (const child of node.children) {
-        visit(child);
+        visit(child, false, node.id);
       }
 
       return;
@@ -96,6 +102,7 @@ export function buildLibraryIndexes(root) {
   return {
     topicsById: nextTopicsById,
     tracksById: nextTracksById,
+    parentTopicIdById: nextParentTopicIdById,
     allTopics: nextAllTopics,
     allTracks: nextAllTracks,
   };
@@ -108,6 +115,7 @@ function storeLibrary(document) {
   rootTopic = document.root;
   topicsById = indexes.topicsById;
   tracksById = indexes.tracksById;
+  parentTopicIdById = indexes.parentTopicIdById;
   allTopics = indexes.allTopics;
   allTracks = indexes.allTracks;
 
@@ -173,6 +181,32 @@ export function getTrack(id) {
 
 export function getAllTopics() {
   return allTopics;
+}
+
+export function getTopicTrail(id) {
+  const topic = getTopic(id);
+
+  if (!topic || topic.id === "root") {
+    return [];
+  }
+
+  const trail = [];
+  const visited = new Set();
+  let current = topic;
+
+  while (current && current.id !== "root") {
+    if (visited.has(current.id)) {
+      throw new Error(`Circular Topic parent relationship detected at ${current.id}.`);
+    }
+
+    visited.add(current.id);
+    trail.push(current);
+
+    const parentId = parentTopicIdById.get(current.id);
+    current = parentId ? getTopic(parentId) : null;
+  }
+
+  return trail.reverse();
 }
 
 export function getAllTracks() {
