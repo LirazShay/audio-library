@@ -3,6 +3,8 @@ import assert from "node:assert/strict";
 import fs from "node:fs";
 
 const trackPageSource = fs.readFileSync("src/app/pages/track-page.js", "utf8");
+const fullPlayerSource = fs.readFileSync("src/app/components/full-player.js", "utf8");
+const progressBarSource = fs.readFileSync("src/app/components/progress-bar.js", "utf8");
 const componentsCss = fs.readFileSync("src/styles/components.css", "utf8");
 
 test("TrackPage loads a routed Track only when it is not already current", () => {
@@ -21,39 +23,40 @@ test("TrackPage does not autoplay from its route-loading effect", () => {
   assert.doesNotMatch(effectMatch[1], /\bplay\s*\(/);
 });
 
-test("TrackPage exposes Play Pause and ten-second skip controls", () => {
-  assert.match(trackPageSource, /handlePlayPause/);
-  assert.match(trackPageSource, /\bplay\(\)\.catch/);
-  assert.match(trackPageSource, /\bpause\(\)/);
-  assert.match(trackPageSource, /skipBackward\(\)/);
-  assert.match(trackPageSource, /skipForward\(\)/);
-  assert.match(trackPageSource, /חזור 10 שניות/);
-  assert.match(trackPageSource, /דלג 10 שניות קדימה/);
+test("FullPlayer preserves Play Pause and ten-second skip controls", () => {
+  assert.match(fullPlayerSource, /handlePlayPause/);
+  assert.match(fullPlayerSource, /\bplay\(\)\.catch/);
+  assert.match(fullPlayerSource, /\bpause\(\)/);
+  assert.match(fullPlayerSource, /skipBackward\(\)/);
+  assert.match(fullPlayerSource, /skipForward\(\)/);
+  assert.match(fullPlayerSource, /חזור 10 שניות/);
+  assert.match(fullPlayerSource, /דלג 10 שניות קדימה/);
 });
 
-test("TrackPage exposes a seek range wired only through Audio Service", () => {
-  assert.match(trackPageSource, /type="range"/);
-  assert.match(trackPageSource, /onInput=\$\{handleSeek\}/);
-  assert.match(trackPageSource, /seek\(Number\(event\.currentTarget\.value\)\)/);
-  assert.doesNotMatch(trackPageSource, /getAudioElement|audio\.currentTime/);
+test("ProgressBar preserves seek behavior through the supplied callback", () => {
+  assert.match(progressBarSource, /type="range"/);
+  assert.match(progressBarSource, /onInput=\$\{handleInput\}/);
+  assert.match(progressBarSource, /onSeek\(Number\(event\.currentTarget\.value\)\)/);
+  assert.match(fullPlayerSource, /onSeek=\$\{seek\}/);
+  assert.doesNotMatch(progressBarSource, /getAudioElement|audio\.currentTime/);
 });
 
-test("TrackPage displays current and duration time", () => {
-  assert.match(trackPageSource, /formatTime\(time\)/);
-  assert.match(trackPageSource, /formatTime\(totalDuration\)/);
+test("ProgressBar displays current and duration time", () => {
+  assert.match(progressBarSource, /formatTime\(currentTime\)/);
+  assert.match(progressBarSource, /formatTime\(duration\)/);
   assert.match(componentsCss, /font-variant-numeric:\s*tabular-nums/);
 });
 
-test("TrackPage renders loading buffering ended and controlled error states", () => {
-  assert.match(trackPageSource, /status === "loading"/);
-  assert.match(trackPageSource, /status === "buffering"/);
-  assert.match(trackPageSource, /status === "ended"/);
-  assert.match(trackPageSource, /playerError\.value/);
-  assert.match(trackPageSource, /role="status"/);
-  assert.match(trackPageSource, /role="alert"/);
+test("FullPlayer preserves loading buffering ended and controlled error states", () => {
+  assert.match(fullPlayerSource, /status === "loading"/);
+  assert.match(fullPlayerSource, /status === "buffering"/);
+  assert.match(fullPlayerSource, /status === "ended"/);
+  assert.match(fullPlayerSource, /playerError\.value/);
+  assert.match(fullPlayerSource, /role="status"/);
+  assert.match(fullPlayerSource, /role="alert"/);
 });
 
-test("basic M6 player controls are touch-friendly and responsive by construction", () => {
+test("basic M6 player controls remain touch-friendly and responsive", () => {
   assert.match(componentsCss, /\.basic-player\s*\{/);
   assert.match(componentsCss, /\.player-button\s*\{/);
   assert.match(componentsCss, /min-height:\s*3rem/);
@@ -61,7 +64,9 @@ test("basic M6 player controls are touch-friendly and responsive by construction
   assert.match(componentsCss, /minmax\(0,\s*1fr\)/);
 });
 
-test("M6.3 does not add M7-only advanced controls", () => {
-  assert.doesNotMatch(trackPageSource, /playbackRate|setRate|volume|repeat|visualization|waveform/i);
-  assert.doesNotMatch(trackPageSource, /Previous|Next|הקודם|הבא/);
+test("M7.1 extraction does not add advanced controls yet", () => {
+  const combined = `${fullPlayerSource}\n${progressBarSource}`;
+
+  assert.doesNotMatch(combined, /playbackRate|setRate|volume|repeat|visualization|waveform/i);
+  assert.doesNotMatch(combined, /Previous|Next|הקודם|הבא/);
 });
