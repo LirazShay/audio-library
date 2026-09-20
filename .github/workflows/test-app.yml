@@ -15,6 +15,7 @@ on:
       - tools/m5-tracks.test.mjs
       - tools/audio-service.test.mjs
       - tools/m6-track-page.test.mjs
+      - tools/m7-player.test.mjs
       - .github/workflows/test-app.yml
   pull_request:
     paths:
@@ -28,6 +29,7 @@ on:
       - tools/m5-tracks.test.mjs
       - tools/audio-service.test.mjs
       - tools/m6-track-page.test.mjs
+      - tools/m7-player.test.mjs
       - .github/workflows/test-app.yml
   workflow_dispatch:
 
@@ -59,6 +61,8 @@ jobs:
           cp src/app/components/topic-card.js /tmp/topic-card.mjs
           cp src/app/components/breadcrumb.js /tmp/breadcrumb.mjs
           cp src/app/components/track-row.js /tmp/track-row.mjs
+          cp src/app/components/full-player.js /tmp/full-player.mjs
+          cp src/app/components/progress-bar.js /tmp/progress-bar.mjs
           node --check /tmp/library-service.mjs
           node --check /tmp/router-service.mjs
           node --check /tmp/audio-service.mjs
@@ -74,6 +78,8 @@ jobs:
           node --check /tmp/topic-card.mjs
           node --check /tmp/breadcrumb.mjs
           node --check /tmp/track-row.mjs
+          node --check /tmp/full-player.mjs
+          node --check /tmp/progress-bar.mjs
 
       - name: Check App component mounting
         run: |
@@ -102,6 +108,9 @@ jobs:
 
       - name: Run M6 Track Page tests
         run: node --test tools/m6-track-page.test.mjs
+
+      - name: Run M7 Player tests
+        run: node --test tools/m7-player.test.mjs
 
       - name: Check M6.1 Audio startup wiring
         run: |
