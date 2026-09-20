@@ -173,3 +173,25 @@ Verification:
 - M7 final DoD: 15/15 PASS
 - full app regression: PASS
 - GitHub Pages deployment: SUCCESS
+
+
+## Post-M7 local media server fix
+- Local preview server now supports HTTP byte ranges for media files
+- Range requests return `206 Partial Content`
+- Responses include:
+  - `Accept-Ranges: bytes`
+  - `Content-Range`
+  - accurate `Content-Length`
+- Invalid ranges return `416`
+- Full media responses also include accurate `Content-Length`
+- This makes local HTMLAudioElement timeline/seek behavior match a proper media server much more closely
+- `update-and-preview.cmd` now stops the previous listener on port 8080 before starting a fresh server, so server-code fixes actually take effect
+- `local-check.cmd` now runs local media-server tests before regenerating the library
+- Added `tools/dev-server.test.js`
+
+Verification:
+- Local media server tests: 4/4 PASS
+- Audio Service live-progress tests: 17/17 PASS
+- M7 Player: 13/13 PASS
+- M7 final DoD: 15/15 PASS
+- full app regression: PASS
