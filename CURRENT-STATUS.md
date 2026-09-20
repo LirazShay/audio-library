@@ -7,7 +7,9 @@ Audio Library
 Implementation in progress.
 
 ## Current milestone
-M2 — Library Loader
+M1 — Basic Generator — COMPLETE
+
+M2 — Library Loader — NOT STARTED
 
 ## Completed
 - Product Requirements
@@ -22,39 +24,19 @@ M2 — Library Loader
 - Production / Release Checklist
 - M0 — Project Skeleton
 - M1 — Basic Generator
-- M2.1 — single-load Library fetch, validation, app state, and basic UI status
 
-## M2.1 result
-- Added `src/app/services/library-service.js`
-- Library URL is resolved relative to the module and points to `src/data/library.json` at runtime
-- `loadLibrary()` caches the same Promise so the library is loaded only once per page session
-- Loaded document is retained in memory and exposed through `getLoadedLibrary()`
-- Validates `schemaVersion === 1`
-- Validates `site.name`
-- Validates root object, root type/id, and `root.children`
-- HTTP failures and invalid documents reject with controlled errors
-- Added `src/app/state/app-state.js` with `loading`, `ready`, and `error` state
-- Application initialization happens once from `main.js`
-- App now shows loading, success, or error state
-- Site title is read from `library.site.name` after load instead of remaining permanently hard-coded in the UI
-- Success state currently shows the number of root-level items only; topic/track indexes are intentionally deferred
 
-## M2.1 verification
-- GitHub Pages deployment completed successfully after the M2.1 code changes
-- Added `.github/workflows/test-app.yml`
-- Browser ES-module syntax checks: PASS
-- Current `src/data/library.json` validation: PASS
-- Unsupported `schemaVersion` rejection test: PASS
-- Test App workflow: PASS
 
-## Local preview bugfix
-- Fixed `main.js` to mount `App` as a real Preact component with `render(h(App, null), root)`
-- This restores Signals reactivity after asynchronous library loading
-- Added a CI guard so the app cannot regress to calling `App()` directly
-- Test App workflow: PASS
+## Local preview verification
+- Local preview infrastructure was prepared after M1 for browser smoke testing
+- The local site successfully loads at `http://127.0.0.1:8080/`
+- The sample library data is available locally for future milestones
+- A Preact mounting bug discovered during local smoke testing was fixed
+- This work is considered pre-M2 verification/infrastructure, not completion of any M2 sub-stage
 
 ## Next
-M2.2 — build the in-memory indexes (`tracksById`, `topicsById`) and expose `getRoot()`, `getTopic(id)`, `getTrack(id)`, `getAllTracks()`, and `getAllTopics()` without adding routing or content pages yet.
+M2 — Library Loader has not started yet. The next "Continue to the next stage" command should begin M2.1 formally.
+
 
 ## Working rule
 "Continue to the next stage" advances one logical unit of work, which may be a sub-stage of a milestone rather than the whole milestone.
