@@ -5,6 +5,7 @@ import fs from "node:fs";
 const trackPageSource = fs.readFileSync("src/app/pages/track-page.js", "utf8");
 const fullPlayerSource = fs.readFileSync("src/app/components/full-player.js", "utf8");
 const progressBarSource = fs.readFileSync("src/app/components/progress-bar.js", "utf8");
+const visualizationSource = fs.readFileSync("src/app/components/player-visualization.js", "utf8");
 const playerStateSource = fs.readFileSync("src/app/state/player-state.js", "utf8");
 const audioServiceSource = fs.readFileSync("src/app/services/audio-service.js", "utf8");
 const componentsCss = fs.readFileSync("src/styles/components.css", "utf8");
@@ -82,9 +83,38 @@ test("advanced FullPlayer controls still do not access the Audio element directl
   assert.match(fullPlayerSource, /setRepeatTrack/);
 });
 
-test("M7.2 still leaves Previous Next and visualization for later sub-stages", () => {
-  const combined = `${trackPageSource}\n${fullPlayerSource}\n${progressBarSource}`;
+test("M7.3 adds disabled Previous and Next placeholders without listening-context logic", () => {
+  assert.match(fullPlayerSource, /aria-label="הקטע הקודם"/);
+  assert.match(fullPlayerSource, /aria-label="הקטע הבא"/);
+  assert.match(fullPlayerSource, /player-nav-placeholder/);
 
-  assert.doesNotMatch(combined, /playNext|playPrevious|Previous|Next|הקודם|הבא/);
-  assert.doesNotMatch(combined, /visualization|waveform|progress-ring/i);
+  const placeholderButtons = fullPlayerSource.match(/player-nav-placeholder/g) ?? [];
+  assert.equal(placeholderButtons.length, 2);
+
+  assert.doesNotMatch(fullPlayerSource, /playNext|playPrevious/);
+});
+
+test("M7.3 FullPlayer renders the lightweight PlayerVisualization", () => {
+  assert.match(fullPlayerSource, /import \{ PlayerVisualization \}/);
+  assert.match(fullPlayerSource, /<\$\{PlayerVisualization\}/);
+  assert.match(fullPlayerSource, /currentTime=\$\{time\}/);
+  assert.match(fullPlayerSource, /duration=\$\{totalDuration\}/);
+  assert.match(fullPlayerSource, /status=\$\{status\}/);
+});
+
+test("PlayerVisualization derives a clamped percentage only from progress data", () => {
+  assert.match(visualizationSource, /currentTime \/ duration/);
+  assert.match(visualizationSource, /Math\.min\(Math\.max\(/);
+  assert.match(visualizationSource, /aria-valuemin="0"/);
+  assert.match(visualizationSource, /aria-valuemax="100"/);
+  assert.match(visualizationSource, /aria-valuenow=\$\{roundedProgress\}/);
+  assert.match(visualizationSource, /data-status=\$\{status\}/);
+});
+
+test("M7.3 visualization uses CSS progress only and no Web Audio API", () => {
+  const combined = `${visualizationSource}\n${componentsCss}\n${fullPlayerSource}`;
+
+  assert.match(componentsCss, /conic-gradient/);
+  assert.match(componentsCss, /--player-progress-angle/);
+  assert.doesNotMatch(combined, /AudioContext|webkitAudioContext|AnalyserNode|createAnalyser|getByteFrequencyData|waveform/i);
 });
