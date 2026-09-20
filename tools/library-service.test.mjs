@@ -36,7 +36,47 @@ function createValidDocument() {
       id: "root",
       name: "ספריית השמע",
       path: "",
-      children: [],
+      children: [
+        {
+          type: "topic",
+          id: "topic_a",
+          name: "נושא א",
+          path: "נושא א",
+          children: [
+            {
+              type: "topic",
+              id: "topic_nested",
+              name: "תת נושא",
+              path: "נושא א/תת נושא",
+              children: [
+                {
+                  type: "track",
+                  id: "track_nested",
+                  title: "קטע פנימי",
+                  audio: "content/נושא א/תת נושא/קטע פנימי.wav",
+                  format: "wav",
+                  text: null,
+                },
+              ],
+            },
+            {
+              type: "track",
+              id: "track_a",
+              title: "קטע א",
+              audio: "content/נושא א/קטע א.wav",
+              format: "wav",
+              text: "טקסט",
+            },
+          ],
+        },
+        {
+          type: "topic",
+          id: "topic_b",
+          name: "נושא ב",
+          path: "נושא ב",
+          children: [],
+        },
+      ],
     },
   };
 }
@@ -160,6 +200,92 @@ test("network failure is converted to a controlled load error", async () => {
 
   try {
     await assert.rejects(module.loadLibrary(), /network request failed/);
+    assert.equal(module.getLoadedLibrary(), null);
+  } finally {
+    globalThis.fetch = originalFetch;
+    await cleanup();
+  }
+});
+
+test("indexes expose recursive Topic and Track lookups after loading", async () => {
+  const originalFetch = globalThis.fetch;
+  const { module, cleanup } = await importFreshService("recursive-indexes");
+  const document = createValidDocument();
+
+  globalThis.fetch = async () => responseWithJson(document);
+
+  try {
+    assert.equal(module.getRoot(), null);
+    assert.equal(module.getTopic("topic_a"), null);
+    assert.equal(module.getTrack("track_a"), null);
+    assert.deepEqual(module.getAllTopics(), []);
+    assert.deepEqual(module.getAllTracks(), []);
+
+    await module.loadLibrary();
+
+    assert.equal(module.getRoot(), document.root);
+    assert.equal(module.getTopic("root"), document.root);
+    assert.equal(module.getTopic("topic_a")?.name, "נושא א");
+    assert.equal(module.getTopic("topic_nested")?.name, "תת נושא");
+    assert.equal(module.getTrack("track_a")?.title, "קטע א");
+    assert.equal(module.getTrack("track_nested")?.title, "קטע פנימי");
+    assert.equal(module.getTopic("missing"), null);
+    assert.equal(module.getTrack("missing"), null);
+
+    assert.deepEqual(
+      module.getAllTopics().map((topic) => topic.id),
+      ["topic_a", "topic_nested", "topic_b"]
+    );
+
+    assert.deepEqual(
+      module.getAllTracks().map((track) => track.id),
+      ["track_nested", "track_a"]
+    );
+  } finally {
+    globalThis.fetch = originalFetch;
+    await cleanup();
+  }
+});
+
+test("duplicate Topic IDs are rejected while building indexes", async () => {
+  const originalFetch = globalThis.fetch;
+  const { module, cleanup } = await importFreshService("duplicate-topic");
+  const document = createValidDocument();
+
+  document.root.children.push({
+    type: "topic",
+    id: "topic_a",
+    name: "כפול",
+    path: "כפול",
+    children: [],
+  });
+
+  globalThis.fetch = async () => responseWithJson(document);
+
+  try {
+    await assert.rejects(module.loadLibrary(), /Duplicate library id: topic_a/);
+    assert.equal(module.getLoadedLibrary(), null);
+    assert.equal(module.getRoot(), null);
+  } finally {
+    globalThis.fetch = originalFetch;
+    await cleanup();
+  }
+});
+
+test("unsupported node types are rejected while building indexes", async () => {
+  const originalFetch = globalThis.fetch;
+  const { module, cleanup } = await importFreshService("unsupported-node");
+  const document = createValidDocument();
+
+  document.root.children.push({
+    type: "unknown",
+    id: "unknown_1",
+  });
+
+  globalThis.fetch = async () => responseWithJson(document);
+
+  try {
+    await assert.rejects(module.loadLibrary(), /Unsupported library node type/);
     assert.equal(module.getLoadedLibrary(), null);
   } finally {
     globalThis.fetch = originalFetch;
