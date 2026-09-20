@@ -12,6 +12,7 @@ on:
       - tools/app-routing.test.mjs
       - tools/m3-routing-integration.test.mjs
       - tools/m4-topics.test.mjs
+      - tools/m5-tracks.test.mjs
       - .github/workflows/test-app.yml
   pull_request:
     paths:
@@ -19,6 +20,10 @@ on:
       - src/data/library.json
       - tools/library-service.test.mjs
       - tools/router-service.test.mjs
+      - tools/app-routing.test.mjs
+      - tools/m3-routing-integration.test.mjs
+      - tools/m4-topics.test.mjs
+      - tools/m5-tracks.test.mjs
       - .github/workflows/test-app.yml
   workflow_dispatch:
 
@@ -47,6 +52,7 @@ jobs:
           cp src/app/pages/track-page.js /tmp/track-page.mjs
           cp src/app/components/topic-card.js /tmp/topic-card.mjs
           cp src/app/components/breadcrumb.js /tmp/breadcrumb.mjs
+          cp src/app/components/track-row.js /tmp/track-row.mjs
           node --check /tmp/library-service.mjs
           node --check /tmp/router-service.mjs
           node --check /tmp/app-state.mjs
@@ -59,6 +65,7 @@ jobs:
           node --check /tmp/track-page.mjs
           node --check /tmp/topic-card.mjs
           node --check /tmp/breadcrumb.mjs
+          node --check /tmp/track-row.mjs
 
       - name: Check App component mounting
         run: |
@@ -78,6 +85,9 @@ jobs:
 
       - name: Run M4 Topic tests
         run: node --test tools/m4-topics.test.mjs
+
+      - name: Run M5 Track tests
+        run: node --test tools/m5-tracks.test.mjs
 
       - name: Check M3.2 router wiring
         run: |
