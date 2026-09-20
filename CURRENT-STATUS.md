@@ -29,6 +29,7 @@ M3 — Router and basic navigation — IN PROGRESS
 - M2.3 — loaded-state Topic/Track totals and full M2 regression pass
 - M3.1 — pure hash route parsing/building contract
 - M3.2 — browser hash runtime and current route Signal
+- M3.3 — route-aware Home and Not Found pages
 
 ## M2.3 result
 - Basic loaded-state UI now uses the Library Service API instead of counting root children
@@ -159,6 +160,44 @@ Existing Library Service regression:
 - pass: 9
 - fail: 0
 
+## M3.3 result
+- Added `src/app/pages/home-page.js`
+- Added `src/app/pages/not-found-page.js`
+- `App` now renders from the reactive `currentRoute` Signal
+- Home route renders `HomePage`
+- Invalid/not-found route renders `NotFoundPage`
+- `NotFoundPage` provides a `#/` link back Home
+- Library loading/error states remain global App states
+- M2 total Topic/Track counts moved cleanly into `HomePage`
+- Topic and Track routes remain explicit temporary placeholders only
+- No Topic page, Track page, ID validation, breadcrumb, or M4 work was added
+
+## M3.3 automated verification
+GitHub Actions `Test App`: PASS
+
+App routing tests:
+- tests: 5
+- pass: 5
+- fail: 0
+
+Coverage:
+- reactive `currentRoute` use: PASS
+- Home → `HomePage`: PASS
+- not-found → `NotFoundPage`: PASS
+- Topic/Track placeholder boundary: PASS
+- M2 Topic/Track totals preserved in Home: PASS
+- Home link from Not Found: PASS
+
+Router regression:
+- tests: 11
+- pass: 11
+- fail: 0
+
+Library Service regression:
+- tests: 9
+- pass: 9
+- fail: 0
+
 ## Sample content
 - 2 top-level sample topics
 - 1 nested subtopic
@@ -175,7 +214,7 @@ Existing Library Service regression:
 GitHub Pages workflow remains configured and active.
 
 ## Next
-M3.3 — add the first route-aware pages and App route rendering: Home and Not Found only. Topic/Track routes will still remain placeholders until their ID validation/navigation behavior is completed in the following M3 sub-stage.
+M3.4 — resolve Topic/Track route IDs against the loaded Library. Existing IDs should reach dedicated minimal route pages/placeholders; unknown Topic/Track IDs should render Not Found. Then verify direct URLs and refresh behavior before closing M3.
 
 
 ## Working rule
