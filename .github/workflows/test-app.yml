@@ -46,6 +46,15 @@ jobs:
       - name: Run Library Loader tests
         run: node --test tools/library-service.test.mjs
 
+      - name: Check M2 loaded-state totals
+        run: |
+          node -e "const fs=require('node:fs'); const s=fs.readFileSync('src/app/app.js','utf8'); if(!s.includes('getAllTopics().length') || !s.includes('getAllTracks().length')) throw new Error('Loaded-state UI must show total Topic and Track counts from Library Service.');"
+
+      - name: Verify real library recursive indexes
+        run: |
+          cp src/app/services/library-service.js /tmp/library-service.mjs
+          node --input-type=module -e "import fs from 'node:fs'; import assert from 'node:assert/strict'; const m=await import('file:///tmp/library-service.mjs'); const doc=JSON.parse(fs.readFileSync('src/data/library.json','utf8')); m.validateLibraryDocument(doc); const indexes=m.buildLibraryIndexes(doc.root); let topics=0,tracks=0; const visit=(node,isRoot=false)=>{ if(node.type==='topic'){ if(!isRoot) topics++; for(const child of node.children) visit(child,false); } else if(node.type==='track'){ tracks++; } }; visit(doc.root,true); assert.equal(indexes.allTopics.length,topics); assert.equal(indexes.allTracks.length,tracks); assert.equal(indexes.topicsById.get('root'),doc.root);"
+
       - name: Validate current library document
         run: |
           cp src/app/services/library-service.js /tmp/library-service.mjs
