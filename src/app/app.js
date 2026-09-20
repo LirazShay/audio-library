@@ -2,8 +2,11 @@ import { html } from "htm/preact";
 import { appStatus, library, libraryError } from "./state/app-state.js";
 import { currentRoute } from "./state/router-state.js";
 import { ROUTE_NAMES } from "./services/router-service.js";
+import { getTopic, getTrack } from "./services/library-service.js";
 import { HomePage } from "./pages/home-page.js";
 import { NotFoundPage } from "./pages/not-found-page.js";
+import { TopicPage } from "./pages/topic-page.js";
+import { TrackPage } from "./pages/track-page.js";
 
 function renderLibraryState() {
   if (appStatus.value === "loading") {
@@ -39,20 +42,20 @@ function renderRoutePage() {
     return html`<${HomePage} siteName=${siteName} />`;
   }
 
-  if (route.name === ROUTE_NAMES.NOT_FOUND) {
-    return html`<${NotFoundPage} />`;
+  if (route.name === ROUTE_NAMES.TOPIC) {
+    const topic = getTopic(route.params.id);
+
+    return topic
+      ? html`<${TopicPage} topic=${topic} />`
+      : html`<${NotFoundPage} />`;
   }
 
-  if (route.name === ROUTE_NAMES.TOPIC || route.name === ROUTE_NAMES.TRACK) {
-    return html`
-      <section class="welcome-card" aria-labelledby="route-placeholder-title">
-        <p class="eyebrow">Audio Library</p>
-        <h1 id="route-placeholder-title">${siteName}</h1>
-        <p class="welcome-status">
-          הנתיב נטען בהצלחה. תצוגת התוכן תחובר בשלב הבא.
-        </p>
-      </section>
-    `;
+  if (route.name === ROUTE_NAMES.TRACK) {
+    const track = getTrack(route.params.id);
+
+    return track
+      ? html`<${TrackPage} track=${track} />`
+      : html`<${NotFoundPage} />`;
   }
 
   return html`<${NotFoundPage} />`;
