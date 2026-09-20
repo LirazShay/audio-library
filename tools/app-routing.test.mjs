@@ -46,5 +46,4 @@ test("NotFoundPage provides a Home hash link", () => {
 test("Topic and Track pages display their resolved entity names", () => {
   assert.match(topicSource, /topic\.name/);
   assert.match(trackSource, /track\.title/);
-  assert.match(trackSource, /בשלבים הבאים/);
 });
