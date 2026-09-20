@@ -6,6 +6,7 @@ const trackPageSource = fs.readFileSync("src/app/pages/track-page.js", "utf8");
 const fullPlayerSource = fs.readFileSync("src/app/components/full-player.js", "utf8");
 const progressBarSource = fs.readFileSync("src/app/components/progress-bar.js", "utf8");
 const componentsCss = fs.readFileSync("src/styles/components.css", "utf8");
+const responsiveCss = fs.readFileSync("src/styles/responsive.css", "utf8");
 
 test("TrackPage loads a routed Track only when it is not already current", () => {
   assert.match(trackPageSource, /useEffect\(\(\) => \{/);
@@ -61,7 +62,8 @@ test("basic M6 player controls remain touch-friendly and responsive", () => {
   assert.match(componentsCss, /\.player-button\s*\{/);
   assert.match(componentsCss, /min-height:\s*3rem/);
   assert.match(componentsCss, /\.basic-player__progress\s*\{/);
-  assert.match(componentsCss, /minmax\(0,\s*1fr\)/);
+  assert.match(componentsCss, /\.basic-player__range\s*\{[\s\S]*grid-column:\s*1 \/ -1/);
+  assert.match(responsiveCss, /minmax\(0,\s*1fr\)/);
 });
 
 test("later player controls preserve the M6 service boundary", () => {
