@@ -63,6 +63,7 @@ jobs:
           cp src/app/components/track-row.js /tmp/track-row.mjs
           cp src/app/components/full-player.js /tmp/full-player.mjs
           cp src/app/components/progress-bar.js /tmp/progress-bar.mjs
+          cp src/app/components/player-visualization.js /tmp/player-visualization.mjs
           node --check /tmp/library-service.mjs
           node --check /tmp/router-service.mjs
           node --check /tmp/audio-service.mjs
@@ -80,6 +81,7 @@ jobs:
           node --check /tmp/track-row.mjs
           node --check /tmp/full-player.mjs
           node --check /tmp/progress-bar.mjs
+          node --check /tmp/player-visualization.mjs
 
       - name: Check App component mounting
         run: |
