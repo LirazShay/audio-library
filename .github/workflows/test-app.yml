@@ -18,6 +18,8 @@ on:
       - tools/m6-track-page.test.mjs
       - tools/m7-player.test.mjs
       - tools/m7-final.test.mjs
+      - tools/dev-server.js
+      - tools/dev-server.test.js
       - .github/workflows/test-app.yml
   pull_request:
     paths:
@@ -34,6 +36,8 @@ on:
       - tools/m6-track-page.test.mjs
       - tools/m7-player.test.mjs
       - tools/m7-final.test.mjs
+      - tools/dev-server.js
+      - tools/dev-server.test.js
       - .github/workflows/test-app.yml
   workflow_dispatch:
 
@@ -120,6 +124,9 @@ jobs:
 
       - name: Run M7 final DoD tests
         run: node --test tools/m7-final.test.mjs
+
+      - name: Run local media server tests
+        run: node --test tools/dev-server.test.js
 
       - name: Check M6.1 Audio startup wiring
         run: |
