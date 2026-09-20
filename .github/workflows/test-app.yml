@@ -7,11 +7,13 @@ on:
     paths:
       - src/app/**
       - src/data/library.json
+      - tools/library-service.test.mjs
       - .github/workflows/test-app.yml
   pull_request:
     paths:
       - src/app/**
       - src/data/library.json
+      - tools/library-service.test.mjs
       - .github/workflows/test-app.yml
   workflow_dispatch:
 
@@ -40,6 +42,9 @@ jobs:
       - name: Check App component mounting
         run: |
           node -e "const fs=require('node:fs'); const s=fs.readFileSync('src/app/main.js','utf8'); if(!s.includes('render(h(App, null), root)')) throw new Error('App must be mounted as a Preact component so Signals stay reactive.');"
+
+      - name: Run Library Loader tests
+        run: node --test tools/library-service.test.mjs
 
       - name: Validate current library document
         run: |
