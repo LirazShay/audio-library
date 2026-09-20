@@ -1,0 +1,14 @@
+{
+  "name": "audio-library-tests",
+  "private": true,
+  "version": "1.0.0",
+  "description": "Development-only browser E2E tests for the static Audio Library.",
+  "scripts": {
+    "test:e2e": "playwright test",
+    "test:e2e:desktop": "playwright test --project=desktop-chromium",
+    "test:e2e:mobile": "playwright test --project=mobile-chromium"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.55.0"
+  }
+}
