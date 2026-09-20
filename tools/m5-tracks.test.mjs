@@ -5,6 +5,7 @@ import path from "node:path";
 import { pathToFileURL } from "node:url";
 
 const library = JSON.parse(fs.readFileSync("src/data/library.json", "utf8"));
+const homeSource = fs.readFileSync("src/app/pages/home-page.js", "utf8");
 const topicPageSource = fs.readFileSync("src/app/pages/topic-page.js", "utf8");
 const trackRowSource = fs.readFileSync("src/app/components/track-row.js", "utf8");
 const componentsCss = fs.readFileSync("src/styles/components.css", "utf8");
@@ -131,4 +132,55 @@ test("Track list styling supports long titles and list presentation", () => {
 test("M5.1 does not add audio playback implementation", () => {
   assert.doesNotMatch(trackRowSource, /<audio|\.play\(|Audio\(/);
   assert.doesNotMatch(topicPageSource, /<audio|\.play\(|Audio\(/);
+});
+
+
+test("Home supports Tracks directly under the logical root without sorting", () => {
+  assert.match(homeSource, /const rootChildren = getRoot\(\)\?\.children \?\? \[\]/);
+  assert.match(homeSource, /child\.type === "track"/);
+  assert.match(homeSource, /rootTracks\.length > 0/);
+  assert.match(homeSource, /rootTracks\.map/);
+  assert.match(homeSource, /<\$\{TrackRow\}/);
+  assert.doesNotMatch(homeSource, /rootTracks\.sort|sort\(.*rootTracks/s);
+});
+
+test("real sample covers a Topic with Tracks only", () => {
+  const topic = findTopicByName("נושא לדוגמה 2");
+  assert.ok(topic);
+
+  assert.equal(
+    topic.children.some((child) => child.type === "topic"),
+    false
+  );
+
+  assert.deepEqual(
+    topic.children
+      .filter((child) => child.type === "track")
+      .map((track) => track.title),
+    ["01 - בדיקה"]
+  );
+});
+
+test("real sample covers a Topic with both child Topics and Tracks", () => {
+  const topic = findTopicByName("נושא לדוגמה 1");
+  assert.ok(topic);
+
+  assert.equal(
+    topic.children.some((child) => child.type === "topic"),
+    true
+  );
+
+  assert.deepEqual(
+    topic.children
+      .filter((child) => child.type === "track")
+      .map((track) => track.title),
+    ["01 - פתיחה", "02 - קטע בלי טקסט"]
+  );
+});
+
+test("Home and Topic pages both reuse the same TrackRow component", () => {
+  assert.match(homeSource, /import \{ TrackRow \}/);
+  assert.match(topicPageSource, /import \{ TrackRow \}/);
+  assert.match(homeSource, /<\$\{TrackRow\}/);
+  assert.match(topicPageSource, /<\$\{TrackRow\}/);
 });
