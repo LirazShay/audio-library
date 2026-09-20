@@ -23,26 +23,49 @@ Implemented:
 
 ### Immediate next action
 
-Before beginning a new product milestone, resolve the one remaining manual verification:
+The browser-visible player progress issue is now covered by real Playwright Headless E2E and no longer requires routine manual verification as a development gate.
 
-1. run `tools\update-and-preview.cmd`
-2. play one of the 45/70/95-second fixtures
-3. confirm visible current time, seek position, percentage, and progress ring advance during playback
-
-If confirmed:
-- mark the progress incident manually verified
-- the next formal product work is M8 / Mini Player
+Next formal product work:
+- M8 Mini/global player is NOT STARTED
 - when the user says `תמשיך לשלב הבא`, begin exactly one M8 logical sub-stage after reading the documented M8 scope
 
-If still broken:
-- do not begin M8 yet
-- follow the diagnostic-panel plan in `docs/14-testing-troubleshooting.md`
+If the user still reproduces the old 0%-progress issue locally:
+- treat it as an environment-specific incident
+- do not claim manual verification passed
+- follow the diagnostic plan in `docs/14-testing-troubleshooting.md`
 
-### Manual verification still pending
+### Browser E2E verification
 
-The latest live-progress + local media Range/restart fixes are automated-test verified, but the user has not yet confirmed that visible time/percentage advances correctly in their local browser after the complete set of fixes.
+GitHub Actions `Test Browser E2E`: PASS
 
-Do not claim that incident is manually closed until the user confirms it.
+Run: `35513341376`
+
+```text
+8/8 PASS
+desktop-chromium: 4/4
+mobile-chromium: 4/4
+```
+
+Verified in a real headless Chromium browser:
+- navigation to a real Track
+- real WAV metadata duration
+- real audio playback
+- visible current time advances
+- seek slider advances
+- percentage/progress advances above 0
+- seek
+- speed
+- repeat
+- desktop mute
+- mobile responsive behavior
+
+### Manual local verification
+
+User-local confirmation of the historical 0%-progress incident is still PENDING.
+
+It is no longer a routine blocker because the exact browser-observable behavior is now covered automatically by real headless-browser E2E.
+
+Do not state that a manual check passed unless the user explicitly confirms it.
 
 ### Cross-chat entry point
 
@@ -263,3 +286,18 @@ Verification:
 - M7 Player: 13/13 PASS
 - M7 final DoD: 15/15 PASS
 - full app regression: PASS
+
+
+## Headless Browser E2E
+- Added Playwright as the browser E2E framework
+- Added `package.json`
+- Added `playwright.config.cjs`
+- Added `e2e/player.spec.js`
+- Added `.github/workflows/test-e2e.yml`
+- Headless Chromium runs automatically in GitHub Actions
+- Desktop and mobile projects are both covered
+- Failure screenshots, traces, videos, and report artifacts are retained
+
+Verification:
+- GitHub Actions run `35513341376`: SUCCESS
+- 8/8 browser E2E tests PASS
