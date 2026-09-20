@@ -9,7 +9,7 @@ Implementation in progress.
 ## Current milestone
 M6 — Audio Engine — COMPLETE
 
-M7 — Full Player — NOT STARTED
+M7 — Full Player — IN PROGRESS
 
 ## Completed
 - Product Requirements
@@ -31,6 +31,7 @@ M7 — Full Player — NOT STARTED
 - M6.1 — singleton Audio engine foundation and central player state
 - M6.2 — Audio control methods and safe seek/skip behavior
 - M6.3 — Track Page Audio integration and complete M6 verification
+- M7.1 — reusable FullPlayer and ProgressBar extraction
 
 ## M6 result
 - Exactly one shared `Audio` instance exists for the application
@@ -99,6 +100,49 @@ Regression:
 - Track Page provides basic functional controls: PASS
 - complete automated regression suite passes: PASS
 
+## M7.1 result
+- Added `src/app/components/full-player.js`
+- Added `src/app/components/progress-bar.js`
+- Extracted the proven M6 Play/Pause/±10/status/error UI into `FullPlayer`
+- Extracted progress/time/seek rendering into `ProgressBar`
+- `TrackPage` now owns only routed Track lifecycle/loading and delegates player UI to `FullPlayer`
+- `ProgressBar` is presentation-only:
+  - no Player State imports
+  - no Audio Service imports
+  - no direct Audio access
+- `FullPlayer` remains the UI layer that talks to Audio Service
+- M6 behavior is preserved:
+  - no autoplay on route load
+  - returning to current Track does not reload Audio
+  - Play/Pause preserved
+  - ±10 preserved
+  - seek preserved
+  - current time/duration preserved
+  - loading/buffering/ended/error preserved
+- No speed, volume, repeat, Previous/Next, visualization, or other advanced M7 controls were added yet
+
+## M7.1 automated verification
+GitHub Actions `Test App`: PASS
+
+M7 Player extraction:
+- tests: 6
+- pass: 6
+- fail: 0
+
+M6 Track Page regression:
+- tests: 8
+- pass: 8
+- fail: 0
+
+Regression:
+- Library Service: 10/10 PASS
+- Router: 12/12 PASS
+- App routing: 7/7 PASS
+- M3 integration: 4/4 PASS
+- M4 Topic/Breadcrumb: 12/12 PASS
+- M5 Track lists: 14/14 PASS
+- Audio Service: 12/12 PASS
+
 ## Sample content
 - 2 top-level sample topics
 - 1 nested subtopic
@@ -118,7 +162,8 @@ Regression:
 GitHub Pages workflow remains configured and active.
 
 ## Next
-M7 — Full Player has not started. The next explicit stage command should begin M7.1 by extracting the proven M6 controls into reusable `FullPlayer` and `ProgressBar` components, keeping behavior unchanged before adding advanced M7 controls.
+M7.2 — add advanced Full Player controls for playback speed, repeat-current, and desktop volume/mute, including Audio Service setters and automated tests. Keep Previous/Next and visualization for later M7 sub-stages.
+
 
 ## Working rule
 Each future "Continue to the next stage" command advances exactly one logical sub-stage.
