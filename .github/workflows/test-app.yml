@@ -37,6 +37,10 @@ jobs:
           node --check /tmp/main.mjs
           node --check /tmp/app.mjs
 
+      - name: Check App component mounting
+        run: |
+          node -e "const fs=require('node:fs'); const s=fs.readFileSync('src/app/main.js','utf8'); if(!s.includes('render(h(App, null), root)')) throw new Error('App must be mounted as a Preact component so Signals stay reactive.');"
+
       - name: Validate current library document
         run: |
           cp src/app/services/library-service.js /tmp/library-service.mjs
