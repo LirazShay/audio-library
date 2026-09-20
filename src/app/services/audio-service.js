@@ -5,11 +5,15 @@ import {
   currentTrack,
   duration,
   isPlaying,
+  muted,
   playbackRate,
   playerError,
   playerStatus,
+  repeatTrack,
   volume,
 } from "../state/player-state.js";
+
+const PLAYBACK_RATES = Object.freeze([0.75, 1, 1.25, 1.5, 1.75, 2]);
 
 let audioElement = null;
 let listenersAttached = false;
@@ -109,6 +113,8 @@ export function initializeAudioService(candidateAudio = null) {
   audioElement.preload = "metadata";
   audioElement.playbackRate = playbackRate.value;
   audioElement.volume = volume.value;
+  audioElement.muted = muted.value;
+  audioElement.loop = repeatTrack.value;
 
   attachAudioListeners(audioElement);
 
@@ -210,6 +216,63 @@ export function skipBackward(seconds = 10) {
   return seek(currentTime.value - seconds);
 }
 
+export function setRate(rate) {
+  if (!Number.isFinite(rate) || !PLAYBACK_RATES.includes(rate)) {
+    throw new Error("Unsupported playback rate.");
+  }
+
+  const audio = initializeAudioService();
+
+  audio.playbackRate = rate;
+  playbackRate.value = rate;
+
+  return rate;
+}
+
+export function setVolume(nextVolume) {
+  if (!Number.isFinite(nextVolume)) {
+    throw new Error("Volume must be a finite number.");
+  }
+
+  const audio = initializeAudioService();
+  const clampedVolume = Math.min(Math.max(nextVolume, 0), 1);
+
+  audio.volume = clampedVolume;
+  volume.value = clampedVolume;
+
+  return clampedVolume;
+}
+
+export function setMuted(nextMuted) {
+  if (typeof nextMuted !== "boolean") {
+    throw new Error("Muted state must be boolean.");
+  }
+
+  const audio = initializeAudioService();
+
+  audio.muted = nextMuted;
+  muted.value = nextMuted;
+
+  return nextMuted;
+}
+
+export function toggleMute() {
+  return setMuted(!muted.value);
+}
+
+export function setRepeatTrack(enabled) {
+  if (typeof enabled !== "boolean") {
+    throw new Error("Repeat state must be boolean.");
+  }
+
+  const audio = requireLoadedTrack();
+
+  audio.loop = enabled;
+  repeatTrack.value = enabled;
+
+  return enabled;
+}
+
 export function loadTrack(track, context = null) {
   if (!track || typeof track !== "object") {
     throw new Error("A valid Track is required.");
@@ -228,6 +291,8 @@ export function loadTrack(track, context = null) {
 
   currentTrack.value = track;
   currentContext.value = context;
+  repeatTrack.value = false;
+  audio.loop = false;
   currentTime.value = 0;
   duration.value = 0;
   isPlaying.value = false;
@@ -243,4 +308,4 @@ export function loadTrack(track, context = null) {
   return source;
 }
 
-export { resolveAudioUrl };
+export { PLAYBACK_RATES, resolveAudioUrl };
