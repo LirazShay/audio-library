@@ -9,7 +9,7 @@ Implementation in progress.
 ## Current milestone
 M5 — Track lists — COMPLETE
 
-M6 — Audio Engine — NOT STARTED
+M6 — Audio Engine — IN PROGRESS
 
 ## Completed
 - Product Requirements
@@ -29,6 +29,7 @@ M6 — Audio Engine — NOT STARTED
 - M4 — Topics and subtopics
 - M5.1 — reusable TrackRow and Topic Track lists
 - M5.2 — root Track lists and full M5 verification
+- M6.1 — singleton Audio engine foundation and central player state
 
 ## M5 result
 - Added reusable `src/app/components/track-row.js`
@@ -82,6 +83,67 @@ Regression:
 - no Audio Engine/playback leaked into M5: PASS
 - full automated regression suite passes: PASS
 
+## M6.1 result
+- Added `src/app/state/player-state.js`
+- Added central Signals for:
+  - `currentTrack`
+  - `currentContext`
+  - `isPlaying`
+  - `playerStatus`
+  - `currentTime`
+  - `duration`
+  - `playbackRate`
+  - `volume`
+  - `playerError`
+- Added `PLAYER_STATUS` values: idle/loading/ready/playing/paused/buffering/ended/error
+- Added `src/app/services/audio-service.js`
+- Added exactly one shared Audio instance for the application
+- Audio service is initialized once from `main.js`
+- Added `loadTrack(track, context)`
+- Track audio URLs are resolved relative to the deployed site structure
+- Loading a Track updates current Track/context and resets time/duration/error state
+- Loading a Track never autoplays
+- Switching Tracks reuses the same Audio instance and replaces its source
+- Media events are translated into central Player State:
+  - `loadedmetadata`
+  - `durationchange`
+  - `timeupdate`
+  - `play`
+  - `pause`
+  - `waiting`
+  - `playing`
+  - `ended`
+  - `error`
+- Audio error state is converted to a controlled Hebrew user-facing message
+- No Full Player UI, Mini Player, play/pause buttons, seek controls, or M7 work was added
+
+## M6.1 automated verification
+GitHub Actions `Test App`: PASS
+
+Audio Service tests:
+- tests: 5
+- pass: 5
+- fail: 0
+
+Coverage:
+- one shared Audio instance: PASS
+- repeated initialization reuses the same Audio: PASS
+- `loadTrack()` updates central state: PASS
+- no autoplay on load: PASS
+- media events update Player State: PASS
+- Track switching reuses the same Audio: PASS
+- invalid Track input is rejected: PASS
+- missing audio path is rejected: PASS
+- startup wiring from `main.js`: PASS
+
+Regression:
+- Library Service: 10/10 PASS
+- Router: 12/12 PASS
+- App routing: 7/7 PASS
+- M3 integration: 4/4 PASS
+- M4 Topic/Breadcrumb: 12/12 PASS
+- M5 Track lists: 14/14 PASS
+
 ## Sample content
 - 2 top-level sample topics
 - 1 nested subtopic
@@ -102,7 +164,8 @@ Regression:
 GitHub Pages workflow remains configured and active.
 
 ## Next
-M6 — Audio Engine has not started. The next explicit stage command should begin M6.1 with one global HTMLAudioElement and a testable player state/service foundation, without building the full player UI from M7.
+M6.2 — add Audio Service control methods: `play()`, `pause()`, `seek()`, `skipForward(10)`, and `skipBackward(10)`, including clamping and play-promise failure handling. Do not build the M7 Full Player UI yet.
+
 
 ## Working rule
 Each future "Continue to the next stage" command advances exactly one logical sub-stage.
