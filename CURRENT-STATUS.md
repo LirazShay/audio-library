@@ -32,6 +32,7 @@ M7 — Full Player — IN PROGRESS
 - M6.2 — Audio control methods and safe seek/skip behavior
 - M6.3 — Track Page Audio integration and complete M6 verification
 - M7.1 — reusable FullPlayer and ProgressBar extraction
+- M7.2 — playback speed repeat-current and desktop volume/mute
 
 ## M6 result
 - Exactly one shared `Audio` instance exists for the application
@@ -143,6 +144,56 @@ Regression:
 - M5 Track lists: 14/14 PASS
 - Audio Service: 12/12 PASS
 
+## M7.2 result
+- Added the specified playback speed choices:
+  - 0.75×
+  - 1×
+  - 1.25×
+  - 1.5×
+  - 1.75×
+  - 2×
+- Added `setRate(rate)` to Audio Service
+- Playback rate stays synchronized between the single Audio instance and Player State
+- Added `repeatTrack` Player State
+- Added `setRepeatTrack(enabled)`
+- Repeat-current maps directly to the shared Audio element's `loop`
+- Repeat is explicitly local to the current Track and resets when a new Track is loaded
+- Added an accessible Repeat control with `aria-pressed` and a visible active state
+- Added `muted` Player State
+- Added `setVolume(value)`, clamped safely to `0..1`
+- Added `setMuted(value)` and `toggleMute()`
+- Volume and mute stay synchronized with the single shared Audio instance
+- Added desktop Volume slider + Mute control
+- Volume UI is intentionally hidden on mobile and shown from the desktop breakpoint
+- FullPlayer continues to use only Audio Service APIs; it never mutates the Audio element directly
+- Previous/Next and visualization remain intentionally deferred to the next M7 sub-stage
+
+## M7.2 automated verification
+GitHub Actions `Test App`: PASS
+
+Audio Service:
+- tests: 16
+- pass: 16
+- fail: 0
+
+M7 Player:
+- tests: 10
+- pass: 10
+- fail: 0
+
+M6 Track Page regression:
+- tests: 8
+- pass: 8
+- fail: 0
+
+Regression:
+- Library Service: 10/10 PASS
+- Router: 12/12 PASS
+- App routing: 7/7 PASS
+- M3 integration: 4/4 PASS
+- M4 Topic/Breadcrumb: 12/12 PASS
+- M5 Track lists: 14/14 PASS
+
 ## Sample content
 - 2 top-level sample topics
 - 1 nested subtopic
@@ -162,7 +213,7 @@ Regression:
 GitHub Pages workflow remains configured and active.
 
 ## Next
-M7.2 — add advanced Full Player controls for playback speed, repeat-current, and desktop volume/mute, including Audio Service setters and automated tests. Keep Previous/Next and visualization for later M7 sub-stages.
+M7.3 — add the documented Previous/Next placeholders and a lightweight player visualization based on existing progress/state only, without Web Audio API or listening-context logic. Keep final responsive/accessibility polish and complete M7 verification for the following sub-stage.
 
 
 ## Working rule
