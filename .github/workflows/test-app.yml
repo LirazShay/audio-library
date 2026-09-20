@@ -46,6 +46,7 @@ jobs:
           cp src/app/pages/topic-page.js /tmp/topic-page.mjs
           cp src/app/pages/track-page.js /tmp/track-page.mjs
           cp src/app/components/topic-card.js /tmp/topic-card.mjs
+          cp src/app/components/breadcrumb.js /tmp/breadcrumb.mjs
           node --check /tmp/library-service.mjs
           node --check /tmp/router-service.mjs
           node --check /tmp/app-state.mjs
@@ -57,6 +58,7 @@ jobs:
           node --check /tmp/topic-page.mjs
           node --check /tmp/track-page.mjs
           node --check /tmp/topic-card.mjs
+          node --check /tmp/breadcrumb.mjs
 
       - name: Check App component mounting
         run: |
