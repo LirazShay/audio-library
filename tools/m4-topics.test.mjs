@@ -43,11 +43,10 @@ test("every real root Topic builds a valid Topic hash route", () => {
   }
 });
 
-test("HomePage reads only root Topic children and renders TopicCard", () => {
+test("HomePage reads root Topic children and renders TopicCard", () => {
   assert.match(homeSource, /getRoot\(\)/);
   assert.match(homeSource, /child\.type === "topic"/);
   assert.match(homeSource, /<\$\{TopicCard\}/);
-  assert.doesNotMatch(homeSource, /TrackRow|TrackPage/);
 });
 
 test("TopicCard uses the Router contract instead of hand-building hashes", () => {
@@ -88,18 +87,16 @@ test("real nested sample Topic exposes its child Topic", () => {
   assert.equal(parsed.params.id, childTopics[0].id);
 });
 
-test("TopicPage renders only direct child Topics through reusable TopicCard", () => {
+test("TopicPage renders direct child Topics through reusable TopicCard", () => {
   assert.match(topicPageSource, /topic\.children\.filter/);
   assert.match(topicPageSource, /child\.type === "topic"/);
   assert.match(topicPageSource, /<\$\{TopicCard\}/);
   assert.match(topicPageSource, /childTopic\.id/);
-  assert.doesNotMatch(topicPageSource, /TrackRow|track\.title|child\.type === "track"/);
 });
 
-test("TopicPage has distinct truly-empty and no-subtopics states", () => {
+test("TopicPage keeps a true empty-Topic state", () => {
   assert.match(topicPageSource, /topic\.children\.length === 0/);
   assert.match(topicPageSource, /אין עדיין תוכן בנושא זה/);
-  assert.match(topicPageSource, /אין תתי־נושאים בנושא זה/);
 });
 
 test("TopicPage structure is depth-independent", () => {
