@@ -1,16 +1,20 @@
 import { html } from "htm/preact";
 import { TopicCard } from "../components/topic-card.js";
+import { Breadcrumb } from "../components/breadcrumb.js";
+import { getTopicTrail } from "../services/library-service.js";
 
 export function TopicPage({ topic }) {
   const childTopics = topic.children.filter(
     (child) => child.type === "topic"
   );
   const isEmptyTopic = topic.children.length === 0;
+  const breadcrumbTopics = getTopicTrail(topic.id);
 
   return html`
     <section class="library-page" aria-labelledby="topic-title">
+      <${Breadcrumb} topics=${breadcrumbTopics} />
+
       <header class="library-page__header">
-        <p><a class="page-back-link" href="#/">← חזרה לדף הבית</a></p>
         <p class="eyebrow">Topic</p>
         <h1 id="topic-title">${topic.name}</h1>
       </header>
