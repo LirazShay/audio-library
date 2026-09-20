@@ -10,6 +10,7 @@ on:
       - tools/library-service.test.mjs
       - tools/router-service.test.mjs
       - tools/app-routing.test.mjs
+      - tools/m3-routing-integration.test.mjs
       - .github/workflows/test-app.yml
   pull_request:
     paths:
@@ -41,6 +42,8 @@ jobs:
           cp src/app/app.js /tmp/app.mjs
           cp src/app/pages/home-page.js /tmp/home-page.mjs
           cp src/app/pages/not-found-page.js /tmp/not-found-page.mjs
+          cp src/app/pages/topic-page.js /tmp/topic-page.mjs
+          cp src/app/pages/track-page.js /tmp/track-page.mjs
           node --check /tmp/library-service.mjs
           node --check /tmp/router-service.mjs
           node --check /tmp/app-state.mjs
@@ -49,6 +52,8 @@ jobs:
           node --check /tmp/app.mjs
           node --check /tmp/home-page.mjs
           node --check /tmp/not-found-page.mjs
+          node --check /tmp/topic-page.mjs
+          node --check /tmp/track-page.mjs
 
       - name: Check App component mounting
         run: |
@@ -62,6 +67,9 @@ jobs:
 
       - name: Run App routing tests
         run: node --test tools/app-routing.test.mjs
+
+      - name: Run M3 routing integration tests
+        run: node --test tools/m3-routing-integration.test.mjs
 
       - name: Check M3.2 router wiring
         run: |
