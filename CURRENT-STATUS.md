@@ -152,3 +152,24 @@ The explicitly agreed M3–M7 implementation horizon is complete. Formal project
 
 ## Working rule
 GitHub is the source of truth.
+
+
+## Post-M7 runtime fix — live progress sync
+- Fixed a runtime issue where Play/Pause state could update while current time, seek progress, and percentage visualization stayed visually stale
+- Audio Service now keeps a lightweight `requestAnimationFrame` progress clock while playback is active
+- The clock reads the real `audio.currentTime` and updates central `currentTime` Player State
+- Native `timeupdate` remains in place as a fallback/source of truth
+- Progress sync stops on pause, ended, error, and Track replacement
+- This updates all dependent UI together:
+  - current time label
+  - seek slider
+  - percentage visualization
+  - progress ring
+- Added a regression test that advances `audio.currentTime` without emitting `timeupdate` and verifies Player State still follows it
+
+Verification:
+- Audio Service: 17/17 PASS
+- M7 Player: 13/13 PASS
+- M7 final DoD: 15/15 PASS
+- full app regression: PASS
+- GitHub Pages deployment: SUCCESS
