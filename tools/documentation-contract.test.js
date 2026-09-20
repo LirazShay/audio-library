@@ -50,7 +50,7 @@ test("CURRENT-STATUS exposes cross-chat current state and manual verification ho
   includesAll(status, [
     "## Continuation snapshot",
     "### Immediate next action",
-    "### Manual verification still pending",
+    "### Manual local verification",
     "AI-START-HERE.md",
     "M8 Mini/global player: NOT STARTED",
   ]);
@@ -113,15 +113,17 @@ test("decision log preserves core architectural decisions", () => {
     "D-012",
     "D-014",
     "D-015",
+    "D-016",
     "Exactly one shared Audio element",
     "GitHub repository is the cross-chat source of truth",
+    "Playwright Headless E2E is the browser behavior gate",
   ]);
 });
 
 test("troubleshooting keeps the unresolved progress incident and exact next diagnostic", () => {
   includesAll(troubleshooting, [
     "player says Playing but visible progress stays at 0%",
-    "PENDING USER CONFIRMATION",
+    "USER LOCAL CONFIRMATION: PENDING",
     "audio.currentTime",
     "Signal currentTime",
     "206 Partial Content",
