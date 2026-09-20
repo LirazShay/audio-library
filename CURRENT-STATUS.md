@@ -4,12 +4,12 @@
 Audio Library
 
 ## Current phase
-Implementation in progress.
+Agreed M3–M7 implementation horizon complete.
 
 ## Current milestone
-M6 — Audio Engine — COMPLETE
+M7 — Full Player — COMPLETE
 
-M7 — Full Player — IN PROGRESS
+M8 — Mini/global player — NOT STARTED (outside the currently agreed M3–M7 completion horizon)
 
 ## Completed
 - Product Requirements
@@ -28,194 +28,49 @@ M7 — Full Player — IN PROGRESS
 - M3 — Router and basic navigation
 - M4 — Topics and subtopics
 - M5 — Track lists
-- M6.1 — singleton Audio engine foundation and central player state
-- M6.2 — Audio control methods and safe seek/skip behavior
-- M6.3 — Track Page Audio integration and complete M6 verification
+- M6 — Audio Engine
 - M7.1 — reusable FullPlayer and ProgressBar extraction
-- M7.2 — playback speed repeat-current and desktop volume/mute
+- M7.2 — playback speed, repeat-current, and desktop volume/mute
 - M7.3 — Previous/Next placeholders and lightweight progress visualization
+- M7.4 — final responsive/accessibility polish and complete M7 verification
+- M7 — Full Player
 
-## M6 result
-- Exactly one shared `Audio` instance exists for the application
-- Audio Service is initialized once from `main.js`
-- Central Player State uses Preact Signals
-- `loadTrack(track, context)` loads a Track without autoplay
-- Switching Tracks reuses the same Audio instance
-- Media events update central Player State
-- `play()`, `pause()`, `seek()`, `skipForward()` and `skipBackward()` are implemented
-- Seek and skip are safely clamped
-- Rejected `audio.play()` Promises become controlled Player errors
-- MP3 and M4A source paths are accepted
-- Audio load/error events become controlled Hebrew user-facing errors
-- Track Page now loads the routed Track into the global Audio Engine
-- Returning to the already-current Track does not reload or interrupt the existing Audio
-- Track Page provides basic Play/Pause
-- Track Page provides ±10 second controls
-- Track Page provides a seek range
-- Track Page displays current time and duration
-- Track Page displays loading, buffering, ended and error states
-- Direct Track routes still do not autoplay
-- No M7-only advanced controls were added
+## M7 final result
+- Full Player is extracted into reusable `FullPlayer` and `ProgressBar` components
+- Track Page owns routed Track lifecycle and delegates player UI
+- Play/Pause works through the single global Audio Engine
+- ±10 second controls work and clamp safely
+- Seek slider updates through Audio Service and never touches the Audio element directly
+- Current time and duration are visible
+- Playback speed options are exactly: 0.75×, 1×, 1.25×, 1.5×, 1.75×, 2×
+- Repeat-current maps to the shared Audio element's loop state and resets for a newly loaded Track
+- Desktop volume slider and mute are implemented
+- Mobile intentionally omits the volume slider to avoid unnecessary control density
+- Previous/Next placeholders are visible, accessible, and honestly disabled until listening-context logic exists
+- Lightweight circular progress visualization is implemented with CSS only
+- No Web Audio API, AudioContext, AnalyserNode, FFT, or waveform processing is used
+- Loading marks the player busy and disables repeated Play activation
+- Buffering remains visible while preserving useful controls
+- Audio errors are announced and provide a `נסה שוב` recovery action
+- Control groups expose semantic accessible labels
+- All player buttons are semantic `<button type="button">` controls
+- Keyboard focus uses a global visible focus ring
+- Touch targets are at least approximately 44–48px high for core controls
+- Mobile progress uses a full-width seek row
+- Desktop restores compact `time | progress | duration` layout
+- Long Track titles use safe wrapping
+- Reduced-motion preference has a global safeguard
+- FullPlayer never manipulates the Audio element directly
 
-## M6 automated verification
+## M7 final automated verification
 GitHub Actions `Test App`: PASS
 
-Audio Service:
-- tests: 12
-- pass: 12
+Final M7 DoD suite:
+- tests: 15
+- pass: 15
 - fail: 0
 
-M6 Track Page integration:
-- tests: 8
-- pass: 8
-- fail: 0
-
-Regression:
-- Library Service: 10/10 PASS
-- Router: 12/12 PASS
-- App routing: 7/7 PASS
-- M3 integration: 4/4 PASS
-- M4 Topic/Breadcrumb: 12/12 PASS
-- M5 Track lists: 14/14 PASS
-
-## M6 Definition of Done
-- one Audio instance only: PASS
-- two Tracks cannot play through separate Audio instances: PASS
-- switching Track while playing reuses and resets the shared Audio: PASS
-- Player State updates from native Audio events: PASS
-- Play works through Audio Service: PASS
-- Pause works through Audio Service: PASS
-- Seek works and clamps safely: PASS
-- ±10 second skip works and clamps safely: PASS
-- current time is reflected in Player State/UI: PASS
-- duration is reflected in Player State/UI: PASS
-- loading state is visible: PASS
-- buffering state is visible: PASS
-- ended state is visible: PASS
-- Audio error is controlled and visible: PASS
-- rejected play Promise is controlled: PASS
-- MP3 source handling: PASS
-- M4A source handling: PASS
-- unknown Track route remains Not Found: PASS
-- direct Track URL loads without autoplay: PASS
-- returning to current Track does not unnecessarily reload Audio: PASS
-- Track Page provides basic functional controls: PASS
-- complete automated regression suite passes: PASS
-
-## M7.1 result
-- Added `src/app/components/full-player.js`
-- Added `src/app/components/progress-bar.js`
-- Extracted the proven M6 Play/Pause/±10/status/error UI into `FullPlayer`
-- Extracted progress/time/seek rendering into `ProgressBar`
-- `TrackPage` now owns only routed Track lifecycle/loading and delegates player UI to `FullPlayer`
-- `ProgressBar` is presentation-only:
-  - no Player State imports
-  - no Audio Service imports
-  - no direct Audio access
-- `FullPlayer` remains the UI layer that talks to Audio Service
-- M6 behavior is preserved:
-  - no autoplay on route load
-  - returning to current Track does not reload Audio
-  - Play/Pause preserved
-  - ±10 preserved
-  - seek preserved
-  - current time/duration preserved
-  - loading/buffering/ended/error preserved
-- No speed, volume, repeat, Previous/Next, visualization, or other advanced M7 controls were added yet
-
-## M7.1 automated verification
-GitHub Actions `Test App`: PASS
-
-M7 Player extraction:
-- tests: 6
-- pass: 6
-- fail: 0
-
-M6 Track Page regression:
-- tests: 8
-- pass: 8
-- fail: 0
-
-Regression:
-- Library Service: 10/10 PASS
-- Router: 12/12 PASS
-- App routing: 7/7 PASS
-- M3 integration: 4/4 PASS
-- M4 Topic/Breadcrumb: 12/12 PASS
-- M5 Track lists: 14/14 PASS
-- Audio Service: 12/12 PASS
-
-## M7.2 result
-- Added the specified playback speed choices:
-  - 0.75×
-  - 1×
-  - 1.25×
-  - 1.5×
-  - 1.75×
-  - 2×
-- Added `setRate(rate)` to Audio Service
-- Playback rate stays synchronized between the single Audio instance and Player State
-- Added `repeatTrack` Player State
-- Added `setRepeatTrack(enabled)`
-- Repeat-current maps directly to the shared Audio element's `loop`
-- Repeat is explicitly local to the current Track and resets when a new Track is loaded
-- Added an accessible Repeat control with `aria-pressed` and a visible active state
-- Added `muted` Player State
-- Added `setVolume(value)`, clamped safely to `0..1`
-- Added `setMuted(value)` and `toggleMute()`
-- Volume and mute stay synchronized with the single shared Audio instance
-- Added desktop Volume slider + Mute control
-- Volume UI is intentionally hidden on mobile and shown from the desktop breakpoint
-- FullPlayer continues to use only Audio Service APIs; it never mutates the Audio element directly
-- Previous/Next and visualization remain intentionally deferred to the next M7 sub-stage
-
-## M7.2 automated verification
-GitHub Actions `Test App`: PASS
-
-Audio Service:
-- tests: 16
-- pass: 16
-- fail: 0
-
-M7 Player:
-- tests: 10
-- pass: 10
-- fail: 0
-
-M6 Track Page regression:
-- tests: 8
-- pass: 8
-- fail: 0
-
-Regression:
-- Library Service: 10/10 PASS
-- Router: 12/12 PASS
-- App routing: 7/7 PASS
-- M3 integration: 4/4 PASS
-- M4 Topic/Breadcrumb: 12/12 PASS
-- M5 Track lists: 14/14 PASS
-
-## M7.3 result
-- Added disabled Previous and Next placeholder controls to the Full Player
-- Placeholders are explicit real buttons with accessible labels, but no listening-context behavior yet
-- Added `src/app/components/player-visualization.js`
-- Added a lightweight circular progress visualization
-- Visualization is derived only from:
-  - `currentTime`
-  - `duration`
-  - current player status metadata
-- Progress is clamped safely to `0..100%`
-- Visualization exposes an accessible `role="progressbar"`
-- Visualization uses CSS `conic-gradient` and a CSS custom property for progress
-- No Web Audio API is used
-- No `AudioContext`, `AnalyserNode`, waveform analysis, FFT, or frequency sampling was added
-- No `playNext()`, `playPrevious()`, or Listening Context behavior was added
-- Existing Full Player controls remain unchanged and functional
-
-## M7.3 automated verification
-GitHub Actions `Test App`: PASS
-
-M7 Player:
+M7 Player suite:
 - tests: 13
 - pass: 13
 - fail: 0
@@ -230,13 +85,48 @@ M6 Track Page regression:
 - pass: 8
 - fail: 0
 
-Regression:
+Full regression:
 - Library Service: 10/10 PASS
 - Router: 12/12 PASS
 - App routing: 7/7 PASS
 - M3 integration: 4/4 PASS
 - M4 Topic/Breadcrumb: 12/12 PASS
 - M5 Track lists: 14/14 PASS
+
+## M7 Definition of Done
+- Play/Pause: PASS
+- ±10 seconds: PASS
+- Previous placeholder: PASS
+- Next placeholder: PASS
+- progress/seek drag contract: PASS
+- current time: PASS
+- duration: PASS
+- playback speed: PASS
+- repeat-current: PASS
+- desktop volume: PASS
+- mute/unmute: PASS
+- loading state: PASS
+- repeated Play blocked while loading: PASS
+- buffering state: PASS
+- error state: PASS
+- error Retry action: PASS
+- lightweight visualization: PASS
+- no Web Audio API: PASS
+- mobile-first layout: PASS
+- narrow-screen progress layout: PASS
+- desktop layout: PASS
+- desktop-only volume UI: PASS
+- long-title overflow protection: PASS
+- keyboard focus visibility: PASS
+- semantic control grouping: PASS
+- touch-target sizing: PASS
+- reduced-motion safeguard: PASS
+- no direct Audio manipulation from UI: PASS
+- full automated regression suite: PASS
+
+## Deployment verification
+- GitHub Pages deployment for code HEAD `19fbd219d9c1a7a197071453d5af475a496aee23`: SUCCESS
+- Production URL remains `https://lirazshay.github.io/audio-library/`
 
 ## Sample content
 - 2 top-level sample topics
@@ -248,21 +138,10 @@ Regression:
 ## Local testing
 - Run `tools/update-and-preview.cmd`
 - Local preview URL: `http://127.0.0.1:8080/`
-- Open any sample Track
-- The basic player can Play/Pause, seek, and skip ±10 seconds
-- The page displays current time and duration after metadata loads
-- Navigating away does not destroy the global Audio instance
-
-## Deployment
-GitHub Pages workflow remains configured and active.
+- Open any sample Track to exercise the completed M7 Full Player
 
 ## Next
-M7.4 — final Full Player responsive/accessibility polish and complete M7 Definition of Done: verify mobile/desktop layout, focus/touch targets, loading/buffering/error/progress states, seek drag contract, speed, repeat, mute/volume, placeholders, visualization, and full regression. If all checks pass, close M7 and the planned M3–M7 implementation horizon.
-
+The explicitly agreed M3–M7 implementation horizon is complete. Formal project milestone M8 exists in the broader roadmap but has not been started.
 
 ## Working rule
-Each future "Continue to the next stage" command advances exactly one logical sub-stage.
-M7 may be split into as many sub-stages as needed for quality.
-Do not report final completion until M7 is fully complete and verified.
-Only after all of M7 is complete, end the response with the word `סיימתי`.
 GitHub is the source of truth.
