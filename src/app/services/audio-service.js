@@ -119,6 +119,97 @@ export function getAudioElement() {
   return audioElement;
 }
 
+function requireLoadedTrack() {
+  if (!currentTrack.value) {
+    throw new Error("No Track is currently loaded.");
+  }
+
+  return initializeAudioService();
+}
+
+function getSeekUpperBound(audio) {
+  if (Number.isFinite(duration.value) && duration.value > 0) {
+    return duration.value;
+  }
+
+  if (Number.isFinite(audio.duration) && audio.duration > 0) {
+    return audio.duration;
+  }
+
+  return null;
+}
+
+export async function play() {
+  const audio = requireLoadedTrack();
+
+  playerError.value = null;
+
+  try {
+    const playResult = audio.play();
+
+    if (playResult && typeof playResult.then === "function") {
+      await playResult;
+    }
+
+    return true;
+  } catch (error) {
+    isPlaying.value = false;
+    playerStatus.value = PLAYER_STATUS.ERROR;
+    playerError.value = "לא ניתן להתחיל את הניגון.";
+    throw error;
+  }
+}
+
+export function pause() {
+  const audio = requireLoadedTrack();
+
+  audio.pause();
+  isPlaying.value = false;
+
+  if (
+    playerStatus.value !== PLAYER_STATUS.LOADING &&
+    playerStatus.value !== PLAYER_STATUS.ENDED &&
+    playerStatus.value !== PLAYER_STATUS.ERROR
+  ) {
+    playerStatus.value = PLAYER_STATUS.PAUSED;
+  }
+
+  return true;
+}
+
+export function seek(targetTime) {
+  if (!Number.isFinite(targetTime)) {
+    throw new Error("Seek target must be a finite number.");
+  }
+
+  const audio = requireLoadedTrack();
+  const upperBound = getSeekUpperBound(audio);
+  const clampedTime = upperBound === null
+    ? Math.max(0, targetTime)
+    : Math.min(Math.max(0, targetTime), upperBound);
+
+  audio.currentTime = clampedTime;
+  currentTime.value = clampedTime;
+
+  return clampedTime;
+}
+
+export function skipForward(seconds = 10) {
+  if (!Number.isFinite(seconds) || seconds < 0) {
+    throw new Error("Skip amount must be a non-negative finite number.");
+  }
+
+  return seek(currentTime.value + seconds);
+}
+
+export function skipBackward(seconds = 10) {
+  if (!Number.isFinite(seconds) || seconds < 0) {
+    throw new Error("Skip amount must be a non-negative finite number.");
+  }
+
+  return seek(currentTime.value - seconds);
+}
+
 export function loadTrack(track, context = null) {
   if (!track || typeof track !== "object") {
     throw new Error("A valid Track is required.");
