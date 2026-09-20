@@ -4,16 +4,25 @@ import {
   currentTrack,
   duration,
   isPlaying,
+  muted,
+  playbackRate,
   playerError,
   playerStatus,
+  repeatTrack,
+  volume,
 } from "../state/player-state.js";
 import {
+  PLAYBACK_RATES,
   loadTrack,
   pause,
   play,
   seek,
+  setRate,
+  setRepeatTrack,
+  setVolume,
   skipBackward,
   skipForward,
+  toggleMute,
 } from "../services/audio-service.js";
 import { ProgressBar } from "./progress-bar.js";
 
@@ -42,6 +51,10 @@ export function FullPlayer({ track }) {
   const totalDuration = isCurrentTrack ? duration.value : 0;
   const error = isCurrentTrack ? playerError.value : null;
   const canSeek = isCurrentTrack && totalDuration > 0;
+  const rate = playbackRate.value;
+  const currentVolume = volume.value;
+  const isMuted = muted.value;
+  const repeating = isCurrentTrack && repeatTrack.value;
 
   function handlePlayPause() {
     if (!isCurrentTrack) {
@@ -54,6 +67,22 @@ export function FullPlayer({ track }) {
     }
 
     void play().catch(() => {});
+  }
+
+  function handleRepeatToggle() {
+    if (!isCurrentTrack) {
+      loadTrack(track);
+    }
+
+    setRepeatTrack(!repeatTrack.value);
+  }
+
+  function handleRateChange(event) {
+    setRate(Number(event.currentTarget.value));
+  }
+
+  function handleVolumeChange(event) {
+    setVolume(Number(event.currentTarget.value));
   }
 
   return html`
@@ -95,6 +124,57 @@ export function FullPlayer({ track }) {
         disabled=${!isCurrentTrack}
         onSeek=${seek}
       />
+
+      <div class="player-advanced-controls">
+        <label class="player-setting">
+          <span>מהירות</span>
+          <select
+            class="player-select"
+            value=${rate}
+            onChange=${handleRateChange}
+            aria-label="מהירות ניגון"
+          >
+            ${PLAYBACK_RATES.map(
+              (option) => html`
+                <option key=${option} value=${option}>${option}×</option>
+              `
+            )}
+          </select>
+        </label>
+
+        <button
+          type="button"
+          class=${`player-button player-button--secondary player-repeat${repeating ? " is-active" : ""}`}
+          onClick=${handleRepeatToggle}
+          aria-pressed=${repeating}
+          aria-label="חזור על הקטע"
+        >
+          חזור על הקטע
+        </button>
+
+        <div class="player-volume" aria-label="עוצמת שמע">
+          <button
+            type="button"
+            class="player-button player-button--secondary player-mute"
+            onClick=${toggleMute}
+            aria-pressed=${isMuted}
+            aria-label=${isMuted ? "בטל השתקה" : "השתק"}
+          >
+            ${isMuted ? "בטל השתקה" : "השתק"}
+          </button>
+
+          <input
+            class="player-volume__range"
+            type="range"
+            min="0"
+            max="1"
+            step="0.05"
+            value=${currentVolume}
+            onInput=${handleVolumeChange}
+            aria-label="עוצמת שמע"
+          />
+        </div>
+      </div>
 
       ${getStatusMessage(status)
         ? html`
