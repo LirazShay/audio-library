@@ -86,4 +86,49 @@ export function buildRoute(name, params = {}) {
   throw new Error(`Unsupported route name: ${String(name)}.`);
 }
 
+function assertBrowserWindow(browserWindow) {
+  if (
+    !browserWindow ||
+    !browserWindow.location ||
+    typeof browserWindow.addEventListener !== "function"
+  ) {
+    throw new Error("Router requires a browser-like window object.");
+  }
+}
+
+export function startRouter(onRouteChange, browserWindow = globalThis.window) {
+  if (typeof onRouteChange !== "function") {
+    throw new Error("Router requires an onRouteChange callback.");
+  }
+
+  assertBrowserWindow(browserWindow);
+
+  const syncFromLocation = () => {
+    onRouteChange(parseRoute(browserWindow.location.hash ?? ""));
+  };
+
+  browserWindow.addEventListener("hashchange", syncFromLocation);
+  syncFromLocation();
+
+  return () => {
+    if (typeof browserWindow.removeEventListener === "function") {
+      browserWindow.removeEventListener("hashchange", syncFromLocation);
+    }
+  };
+}
+
+export function navigate(name, params = {}, browserWindow = globalThis.window) {
+  if (!browserWindow || !browserWindow.location) {
+    throw new Error("Router navigation requires a browser-like window object.");
+  }
+
+  const hash = buildRoute(name, params);
+
+  if (browserWindow.location.hash !== hash) {
+    browserWindow.location.hash = hash;
+  }
+
+  return hash;
+}
+
 export { ROUTE_NAMES };
