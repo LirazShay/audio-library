@@ -35,11 +35,13 @@ jobs:
           cp src/app/services/library-service.js /tmp/library-service.mjs
           cp src/app/services/router-service.js /tmp/router-service.mjs
           cp src/app/state/app-state.js /tmp/app-state.mjs
+          cp src/app/state/router-state.js /tmp/router-state.mjs
           cp src/app/main.js /tmp/main.mjs
           cp src/app/app.js /tmp/app.mjs
           node --check /tmp/library-service.mjs
           node --check /tmp/router-service.mjs
           node --check /tmp/app-state.mjs
+          node --check /tmp/router-state.mjs
           node --check /tmp/main.mjs
           node --check /tmp/app.mjs
 
@@ -52,6 +54,10 @@ jobs:
 
       - name: Run Router tests
         run: node --test tools/router-service.test.mjs
+
+      - name: Check M3.2 router wiring
+        run: |
+          node -e "const fs=require('node:fs'); const main=fs.readFileSync('src/app/main.js','utf8'); const state=fs.readFileSync('src/app/state/router-state.js','utf8'); if(!main.includes('startRouter(setCurrentRoute)')) throw new Error('Router runtime must initialize from main.js.'); if(!state.includes('currentRoute = signal(')) throw new Error('currentRoute must be a Preact Signal.');"
 
       - name: Check M2 loaded-state totals
         run: |
