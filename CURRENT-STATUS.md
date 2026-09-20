@@ -9,7 +9,7 @@ Implementation in progress.
 ## Current milestone
 M4 — Topics and subtopics — COMPLETE
 
-M5 — Track lists — NOT STARTED
+M5 — Track lists — IN PROGRESS
 
 ## Completed
 - Product Requirements
@@ -29,6 +29,7 @@ M5 — Track lists — NOT STARTED
 - M4.1 — root Topic presentation and reusable TopicCard
 - M4.2 — nested child Topics on TopicPage and empty states
 - M4.3 — arbitrary-depth Breadcrumb and parent navigation
+- M5.1 — reusable TrackRow and Topic Track lists
 
 ## M4.3 result
 - Added `src/app/components/breadcrumb.js`
@@ -88,6 +89,48 @@ M4 Topic/Breadcrumb:
 - Track lists remain outside M4: PASS
 - automated regression suite passes: PASS
 
+## M5.1 result
+- Added reusable `src/app/components/track-row.js`
+- `TrackRow` builds direct Track URLs through `buildRoute(ROUTE_NAMES.TRACK, ...)`
+- Track rows display the Track title
+- Optional numeric duration is formatted only when present; missing duration is not invented
+- `TopicPage` now renders direct Track children under a dedicated `קטעי שמע` list
+- Track order is preserved exactly from the Topic's JSON children order
+- No Track sorting is performed in the browser
+- Topics remain above Tracks as separate sections
+- Empty Track sections are omitted
+- Tracks with `text: null` remain visible and navigable
+- Long Track titles wrap safely
+- No audio element, playback call, Audio Engine, or M6 work was added
+- M4 regression assertions were updated to stop enforcing the now-obsolete pre-M5 “no Track UI” boundary
+
+## M5.1 automated verification
+GitHub Actions `Test App`: PASS
+
+M5 Track tests:
+- tests: 10
+- pass: 10
+- fail: 0
+
+Coverage:
+- real sample Track order: PASS
+- nested Topic Track order: PASS
+- Track without TXT remains visible: PASS
+- TopicPage Track rows: PASS
+- empty Track section omitted: PASS
+- TrackRow uses Router contract: PASS
+- all 4 sample Tracks build direct URLs: PASS
+- optional duration behavior: PASS
+- long title/list styling: PASS
+- no playback implementation in M5.1: PASS
+
+Regression:
+- Library Service: 10/10 PASS
+- Router: 12/12 PASS
+- App routing: 7/7 PASS
+- M3 integration: 4/4 PASS
+- M4 Topic/Breadcrumb: 12/12 PASS
+
 ## Sample content
 - 2 top-level sample topics
 - 1 nested subtopic
@@ -106,7 +149,8 @@ M4 Topic/Breadcrumb:
 GitHub Pages workflow remains configured and active.
 
 ## Next
-M5 — Track lists has not started. The next explicit stage command should begin M5.1 with a reusable TrackRow and Track lists inside Topic pages, preserving JSON order and without adding audio playback yet.
+M5.2 — render Tracks that exist directly under the logical root on Home using the same `TrackRow`, then run the complete M5 regression/Definition of Done pass. Do not add playback yet.
+
 
 ## Working rule
 Each future "Continue to the next stage" command advances exactly one logical sub-stage.
