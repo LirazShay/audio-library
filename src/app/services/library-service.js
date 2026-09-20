@@ -3,6 +3,11 @@ const LIBRARY_URL = new URL("../../data/library.json", import.meta.url);
 
 let libraryPromise = null;
 let loadedLibrary = null;
+let rootTopic = null;
+let topicsById = new Map();
+let tracksById = new Map();
+let allTopics = [];
+let allTracks = [];
 
 function assertObject(value, message) {
   if (!value || typeof value !== "object" || Array.isArray(value)) {
@@ -38,6 +43,77 @@ export function validateLibraryDocument(document) {
   return document;
 }
 
+function addUniqueItem(map, item, kind) {
+  if (typeof item.id !== "string" || item.id.trim() === "") {
+    throw new Error(`Library ${kind} is missing a valid id.`);
+  }
+
+  if (map.has(item.id)) {
+    throw new Error(`Duplicate library id: ${item.id}.`);
+  }
+
+  map.set(item.id, item);
+}
+
+export function buildLibraryIndexes(root) {
+  const nextTopicsById = new Map();
+  const nextTracksById = new Map();
+  const nextAllTopics = [];
+  const nextAllTracks = [];
+
+  function visit(node, isRoot = false) {
+    assertObject(node, "Library node must be an object.");
+
+    if (node.type === "topic") {
+      addUniqueItem(nextTopicsById, node, "topic");
+
+      if (!Array.isArray(node.children)) {
+        throw new Error(`Library topic ${node.id} must have a children array.`);
+      }
+
+      if (!isRoot) {
+        nextAllTopics.push(node);
+      }
+
+      for (const child of node.children) {
+        visit(child);
+      }
+
+      return;
+    }
+
+    if (node.type === "track") {
+      addUniqueItem(nextTracksById, node, "track");
+      nextAllTracks.push(node);
+      return;
+    }
+
+    throw new Error(`Unsupported library node type: ${String(node.type)}.`);
+  }
+
+  visit(root, true);
+
+  return {
+    topicsById: nextTopicsById,
+    tracksById: nextTracksById,
+    allTopics: nextAllTopics,
+    allTracks: nextAllTracks,
+  };
+}
+
+function storeLibrary(document) {
+  const indexes = buildLibraryIndexes(document.root);
+
+  loadedLibrary = document;
+  rootTopic = document.root;
+  topicsById = indexes.topicsById;
+  tracksById = indexes.tracksById;
+  allTopics = indexes.allTopics;
+  allTracks = indexes.allTracks;
+
+  return document;
+}
+
 async function fetchLibrary() {
   let response;
 
@@ -68,8 +144,7 @@ async function fetchLibrary() {
   }
 
   const validatedDocument = validateLibraryDocument(document);
-  loadedLibrary = validatedDocument;
-  return validatedDocument;
+  return storeLibrary(validatedDocument);
 }
 
 export function loadLibrary() {
@@ -82,6 +157,26 @@ export function loadLibrary() {
 
 export function getLoadedLibrary() {
   return loadedLibrary;
+}
+
+export function getRoot() {
+  return rootTopic;
+}
+
+export function getTopic(id) {
+  return topicsById.get(id) ?? null;
+}
+
+export function getTrack(id) {
+  return tracksById.get(id) ?? null;
+}
+
+export function getAllTopics() {
+  return allTopics;
+}
+
+export function getAllTracks() {
+  return allTracks;
 }
 
 export { LIBRARY_URL, SUPPORTED_SCHEMA_VERSION };
