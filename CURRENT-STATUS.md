@@ -28,6 +28,7 @@ M3 — Router and basic navigation — IN PROGRESS
 - M2.2 — recursive in-memory Topic/Track indexes and lookup API
 - M2.3 — loaded-state Topic/Track totals and full M2 regression pass
 - M3.1 — pure hash route parsing/building contract
+- M3.2 — browser hash runtime and current route Signal
 
 ## M2.3 result
 - Basic loaded-state UI now uses the Library Service API instead of counting root children
@@ -120,6 +121,44 @@ Existing Library Service regression:
 - pass: 9
 - fail: 0
 
+## M3.2 result
+- Added `src/app/state/router-state.js`
+- Added reactive `currentRoute` using Preact Signals
+- Added `setCurrentRoute(route)`
+- Added `startRouter(onRouteChange, window)`
+- Router initializes from the current `window.location.hash`
+- Router listens to `hashchange`, so browser Back/Forward can update route state
+- Added `navigate(name, params, window)`
+- Navigation uses the M3.1 `buildRoute()` contract and updates the browser hash
+- Same-hash navigation avoids unnecessary assignment
+- `main.js` initializes the router before rendering the App
+- `startRouter()` returns an unsubscribe function for clean event-listener removal
+- No page rendering, Topic/Track page UI, or M3.3 work was added
+
+## M3.2 automated verification
+GitHub Actions `Test App`: PASS
+
+Router tests:
+- tests: 11
+- pass: 11
+- fail: 0
+
+New M3.2 coverage:
+- initial route sync from browser hash: PASS
+- `hashchange` route update: PASS
+- listener unsubscribe: PASS
+- `navigate()` hash update: PASS
+- encoded Unicode navigation: PASS
+- same-hash navigation: PASS
+- invalid browser dependency guards: PASS
+- Preact `currentRoute` Signal wiring: PASS
+- router startup from `main.js`: PASS
+
+Existing Library Service regression:
+- tests: 9
+- pass: 9
+- fail: 0
+
 ## Sample content
 - 2 top-level sample topics
 - 1 nested subtopic
@@ -136,7 +175,7 @@ Existing Library Service regression:
 GitHub Pages workflow remains configured and active.
 
 ## Next
-M3.2 — connect the pure router contract to browser state: current route Signal, startup from `window.location.hash`, `hashchange`, and `navigate()`. Do not add page rendering yet.
+M3.3 — add the first route-aware pages and App route rendering: Home and Not Found only. Topic/Track routes will still remain placeholders until their ID validation/navigation behavior is completed in the following M3 sub-stage.
 
 
 ## Working rule
