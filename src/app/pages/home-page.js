@@ -5,12 +5,17 @@ import {
   getRoot,
 } from "../services/library-service.js";
 import { TopicCard } from "../components/topic-card.js";
+import { TrackRow } from "../components/track-row.js";
 
 export function HomePage({ siteName }) {
   const topicCount = getAllTopics().length;
   const trackCount = getAllTracks().length;
-  const rootTopics = (getRoot()?.children ?? []).filter(
+  const rootChildren = getRoot()?.children ?? [];
+  const rootTopics = rootChildren.filter(
     (child) => child.type === "topic"
+  );
+  const rootTracks = rootChildren.filter(
+    (child) => child.type === "track"
   );
 
   return html`
@@ -40,6 +45,24 @@ export function HomePage({ siteName }) {
               <p class="empty-state">אין עדיין נושאים בספרייה.</p>
             `}
       </section>
+
+      ${rootTracks.length > 0
+        ? html`
+            <section class="track-section" aria-labelledby="root-tracks-title">
+              <h2 id="root-tracks-title">קטעי שמע</h2>
+              <div class="track-list">
+                ${rootTracks.map(
+                  (track) => html`
+                    <${TrackRow}
+                      key=${track.id}
+                      track=${track}
+                    />
+                  `
+                )}
+              </div>
+            </section>
+          `
+        : null}
     </section>
   `;
 }
