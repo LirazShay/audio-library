@@ -41,7 +41,7 @@ test("TrackPage exposes a seek range wired only through Audio Service", () => {
 test("TrackPage displays current and duration time", () => {
   assert.match(trackPageSource, /formatTime\(time\)/);
   assert.match(trackPageSource, /formatTime\(totalDuration\)/);
-  assert.match(trackPageSource, /font-variant-numeric:\s*tabular-nums/);
+  assert.match(componentsCss, /font-variant-numeric:\s*tabular-nums/);
 });
 
 test("TrackPage renders loading buffering ended and controlled error states", () => {
