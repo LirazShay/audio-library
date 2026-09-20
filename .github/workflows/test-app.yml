@@ -8,12 +8,14 @@ on:
       - src/app/**
       - src/data/library.json
       - tools/library-service.test.mjs
+      - tools/router-service.test.mjs
       - .github/workflows/test-app.yml
   pull_request:
     paths:
       - src/app/**
       - src/data/library.json
       - tools/library-service.test.mjs
+      - tools/router-service.test.mjs
       - .github/workflows/test-app.yml
   workflow_dispatch:
 
@@ -31,10 +33,12 @@ jobs:
       - name: Check browser module syntax
         run: |
           cp src/app/services/library-service.js /tmp/library-service.mjs
+          cp src/app/services/router-service.js /tmp/router-service.mjs
           cp src/app/state/app-state.js /tmp/app-state.mjs
           cp src/app/main.js /tmp/main.mjs
           cp src/app/app.js /tmp/app.mjs
           node --check /tmp/library-service.mjs
+          node --check /tmp/router-service.mjs
           node --check /tmp/app-state.mjs
           node --check /tmp/main.mjs
           node --check /tmp/app.mjs
@@ -45,6 +49,9 @@ jobs:
 
       - name: Run Library Loader tests
         run: node --test tools/library-service.test.mjs
+
+      - name: Run Router tests
+        run: node --test tools/router-service.test.mjs
 
       - name: Check M2 loaded-state totals
         run: |
