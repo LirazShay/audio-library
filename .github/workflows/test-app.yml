@@ -9,6 +9,7 @@ on:
       - src/data/library.json
       - tools/library-service.test.mjs
       - tools/router-service.test.mjs
+      - tools/app-routing.test.mjs
       - .github/workflows/test-app.yml
   pull_request:
     paths:
@@ -38,12 +39,16 @@ jobs:
           cp src/app/state/router-state.js /tmp/router-state.mjs
           cp src/app/main.js /tmp/main.mjs
           cp src/app/app.js /tmp/app.mjs
+          cp src/app/pages/home-page.js /tmp/home-page.mjs
+          cp src/app/pages/not-found-page.js /tmp/not-found-page.mjs
           node --check /tmp/library-service.mjs
           node --check /tmp/router-service.mjs
           node --check /tmp/app-state.mjs
           node --check /tmp/router-state.mjs
           node --check /tmp/main.mjs
           node --check /tmp/app.mjs
+          node --check /tmp/home-page.mjs
+          node --check /tmp/not-found-page.mjs
 
       - name: Check App component mounting
         run: |
@@ -55,13 +60,16 @@ jobs:
       - name: Run Router tests
         run: node --test tools/router-service.test.mjs
 
+      - name: Run App routing tests
+        run: node --test tools/app-routing.test.mjs
+
       - name: Check M3.2 router wiring
         run: |
           node -e "const fs=require('node:fs'); const main=fs.readFileSync('src/app/main.js','utf8'); const state=fs.readFileSync('src/app/state/router-state.js','utf8'); if(!main.includes('startRouter(setCurrentRoute)')) throw new Error('Router runtime must initialize from main.js.'); if(!state.includes('currentRoute = signal(')) throw new Error('currentRoute must be a Preact Signal.');"
 
       - name: Check M2 loaded-state totals
         run: |
-          node -e "const fs=require('node:fs'); const s=fs.readFileSync('src/app/app.js','utf8'); if(!s.includes('getAllTopics().length') || !s.includes('getAllTracks().length')) throw new Error('Loaded-state UI must show total Topic and Track counts from Library Service.');"
+          node -e "const fs=require('node:fs'); const s=fs.readFileSync('src/app/pages/home-page.js','utf8'); if(!s.includes('getAllTopics().length') || !s.includes('getAllTracks().length')) throw new Error('Home loaded-state UI must show total Topic and Track counts from Library Service.');"
 
       - name: Verify real library recursive indexes
         run: |
