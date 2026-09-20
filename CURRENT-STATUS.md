@@ -33,6 +33,7 @@ M7 — Full Player — IN PROGRESS
 - M6.3 — Track Page Audio integration and complete M6 verification
 - M7.1 — reusable FullPlayer and ProgressBar extraction
 - M7.2 — playback speed repeat-current and desktop volume/mute
+- M7.3 — Previous/Next placeholders and lightweight progress visualization
 
 ## M6 result
 - Exactly one shared `Audio` instance exists for the application
@@ -194,6 +195,49 @@ Regression:
 - M4 Topic/Breadcrumb: 12/12 PASS
 - M5 Track lists: 14/14 PASS
 
+## M7.3 result
+- Added disabled Previous and Next placeholder controls to the Full Player
+- Placeholders are explicit real buttons with accessible labels, but no listening-context behavior yet
+- Added `src/app/components/player-visualization.js`
+- Added a lightweight circular progress visualization
+- Visualization is derived only from:
+  - `currentTime`
+  - `duration`
+  - current player status metadata
+- Progress is clamped safely to `0..100%`
+- Visualization exposes an accessible `role="progressbar"`
+- Visualization uses CSS `conic-gradient` and a CSS custom property for progress
+- No Web Audio API is used
+- No `AudioContext`, `AnalyserNode`, waveform analysis, FFT, or frequency sampling was added
+- No `playNext()`, `playPrevious()`, or Listening Context behavior was added
+- Existing Full Player controls remain unchanged and functional
+
+## M7.3 automated verification
+GitHub Actions `Test App`: PASS
+
+M7 Player:
+- tests: 13
+- pass: 13
+- fail: 0
+
+Audio Service:
+- tests: 16
+- pass: 16
+- fail: 0
+
+M6 Track Page regression:
+- tests: 8
+- pass: 8
+- fail: 0
+
+Regression:
+- Library Service: 10/10 PASS
+- Router: 12/12 PASS
+- App routing: 7/7 PASS
+- M3 integration: 4/4 PASS
+- M4 Topic/Breadcrumb: 12/12 PASS
+- M5 Track lists: 14/14 PASS
+
 ## Sample content
 - 2 top-level sample topics
 - 1 nested subtopic
@@ -213,7 +257,7 @@ Regression:
 GitHub Pages workflow remains configured and active.
 
 ## Next
-M7.3 — add the documented Previous/Next placeholders and a lightweight player visualization based on existing progress/state only, without Web Audio API or listening-context logic. Keep final responsive/accessibility polish and complete M7 verification for the following sub-stage.
+M7.4 — final Full Player responsive/accessibility polish and complete M7 Definition of Done: verify mobile/desktop layout, focus/touch targets, loading/buffering/error/progress states, seek drag contract, speed, repeat, mute/volume, placeholders, visualization, and full regression. If all checks pass, close M7 and the planned M3–M7 implementation horizon.
 
 
 ## Working rule
