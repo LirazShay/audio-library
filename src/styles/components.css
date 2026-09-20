@@ -104,3 +104,46 @@
 .page-back-link:focus-visible {
   text-decoration: underline;
 }
+
+
+.breadcrumb {
+  width: 100%;
+  margin-block-end: var(--space-6);
+  overflow-x: auto;
+}
+
+.breadcrumb__list {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-width: max-content;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  color: var(--color-muted);
+  font-size: 0.9rem;
+}
+
+.breadcrumb__item {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.breadcrumb a {
+  text-decoration: none;
+}
+
+.breadcrumb a:hover,
+.breadcrumb a:focus-visible {
+  text-decoration: underline;
+}
+
+.breadcrumb [aria-current="page"] {
+  color: var(--color-text);
+  font-weight: 700;
+}
+
+.breadcrumb__separator {
+  color: var(--color-muted);
+}
