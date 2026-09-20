@@ -19,4 +19,6 @@ export const currentTime = signal(0);
 export const duration = signal(0);
 export const playbackRate = signal(1);
 export const volume = signal(1);
+export const muted = signal(false);
+export const repeatTrack = signal(false);
 export const playerError = signal(null);
