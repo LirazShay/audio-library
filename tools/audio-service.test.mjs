@@ -19,6 +19,7 @@ class FakeAudio {
     this.pauseCount = 0;
     this.loadCount = 0;
     this.playCount = 0;
+    this.playError = null;
   }
 
   addEventListener(type, handler) {
@@ -38,6 +39,11 @@ class FakeAudio {
 
   play() {
     this.playCount += 1;
+
+    if (this.playError) {
+      return Promise.reject(this.playError);
+    }
+
     this.emit("play");
     return Promise.resolve();
   }
@@ -253,6 +259,147 @@ test("loadTrack rejects invalid Track input and missing audio paths", async () =
       () => service.loadTrack({ id: "track_1", audio: "" }),
       /audio path/
     );
+  } finally {
+    await cleanup();
+  }
+});
+
+
+test("play and pause control the shared Audio through the service", async () => {
+  const { service, state, cleanup } = await importFreshAudioService("play-pause");
+  const audio = new FakeAudio();
+
+  try {
+    service.initializeAudioService(audio);
+    service.loadTrack(createTrack());
+
+    audio.duration = 90;
+    audio.emit("loadedmetadata");
+
+    assert.equal(await service.play(), true);
+    assert.equal(audio.playCount, 1);
+    assert.equal(state.isPlaying.value, true);
+    assert.equal(state.playerStatus.value, "playing");
+
+    assert.equal(service.pause(), true);
+    assert.equal(audio.pauseCount, 2);
+    assert.equal(state.isPlaying.value, false);
+    assert.equal(state.playerStatus.value, "paused");
+  } finally {
+    await cleanup();
+  }
+});
+
+test("seek clamps to zero and the loaded duration", async () => {
+  const { service, state, cleanup } = await importFreshAudioService("seek-clamp");
+  const audio = new FakeAudio();
+
+  try {
+    service.initializeAudioService(audio);
+    service.loadTrack(createTrack());
+
+    audio.duration = 120;
+    audio.emit("loadedmetadata");
+
+    assert.equal(service.seek(-10), 0);
+    assert.equal(audio.currentTime, 0);
+    assert.equal(state.currentTime.value, 0);
+
+    assert.equal(service.seek(45.5), 45.5);
+    assert.equal(audio.currentTime, 45.5);
+    assert.equal(state.currentTime.value, 45.5);
+
+    assert.equal(service.seek(999), 120);
+    assert.equal(audio.currentTime, 120);
+    assert.equal(state.currentTime.value, 120);
+  } finally {
+    await cleanup();
+  }
+});
+
+test("seek allows a non-negative target before duration is known", async () => {
+  const { service, state, cleanup } = await importFreshAudioService("seek-unknown-duration");
+  const audio = new FakeAudio();
+
+  try {
+    service.initializeAudioService(audio);
+    service.loadTrack(createTrack());
+
+    assert.equal(service.seek(30), 30);
+    assert.equal(audio.currentTime, 30);
+    assert.equal(state.currentTime.value, 30);
+  } finally {
+    await cleanup();
+  }
+});
+
+test("skipForward and skipBackward default to ten seconds and clamp safely", async () => {
+  const { service, state, cleanup } = await importFreshAudioService("skip");
+  const audio = new FakeAudio();
+
+  try {
+    service.initializeAudioService(audio);
+    service.loadTrack(createTrack());
+
+    audio.duration = 60;
+    audio.emit("loadedmetadata");
+
+    service.seek(25);
+
+    assert.equal(service.skipForward(), 35);
+    assert.equal(state.currentTime.value, 35);
+
+    assert.equal(service.skipBackward(), 25);
+    assert.equal(state.currentTime.value, 25);
+
+    assert.equal(service.skipBackward(40), 0);
+    assert.equal(state.currentTime.value, 0);
+
+    service.seek(55);
+    assert.equal(service.skipForward(20), 60);
+    assert.equal(state.currentTime.value, 60);
+  } finally {
+    await cleanup();
+  }
+});
+
+test("control methods reject invalid input and operation without a loaded Track", async () => {
+  const { service, cleanup } = await importFreshAudioService("control-guards");
+  const audio = new FakeAudio();
+
+  try {
+    service.initializeAudioService(audio);
+
+    await assert.rejects(service.play(), /No Track is currently loaded/);
+    assert.throws(() => service.pause(), /No Track is currently loaded/);
+    assert.throws(() => service.seek(5), /No Track is currently loaded/);
+
+    service.loadTrack(createTrack());
+
+    assert.throws(() => service.seek(Number.NaN), /finite number/);
+    assert.throws(() => service.skipForward(-1), /non-negative finite number/);
+    assert.throws(() => service.skipBackward(Number.POSITIVE_INFINITY), /non-negative finite number/);
+  } finally {
+    await cleanup();
+  }
+});
+
+test("play promise rejection becomes a controlled player error", async () => {
+  const { service, state, cleanup } = await importFreshAudioService("play-rejection");
+  const audio = new FakeAudio();
+  const playError = new Error("NotAllowedError");
+
+  try {
+    service.initializeAudioService(audio);
+    service.loadTrack(createTrack());
+    audio.playError = playError;
+
+    await assert.rejects(service.play(), /NotAllowedError/);
+
+    assert.equal(audio.playCount, 1);
+    assert.equal(state.isPlaying.value, false);
+    assert.equal(state.playerStatus.value, "error");
+    assert.equal(state.playerError.value, "לא ניתן להתחיל את הניגון.");
   } finally {
     await cleanup();
   }
