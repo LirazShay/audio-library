@@ -292,3 +292,59 @@ test("unsupported node types are rejected while building indexes", async () => {
     await cleanup();
   }
 });
+
+
+test("getTopicTrail returns an ordered trail for arbitrary depth", async () => {
+  const originalFetch = globalThis.fetch;
+  const { module, cleanup } = await importFreshService("topic-trail-depth");
+  const document = createValidDocument();
+
+  const topTopic = {
+    type: "topic",
+    id: "topic_1",
+    name: "רמה 1",
+    path: "רמה 1",
+    children: [],
+  };
+
+  document.root.children = [topTopic];
+
+  let current = topTopic;
+
+  for (let level = 2; level <= 10; level += 1) {
+    const child = {
+      type: "topic",
+      id: `topic_${level}`,
+      name: `רמה ${level}`,
+      path: Array.from(
+        { length: level },
+        (_, index) => `רמה ${index + 1}`
+      ).join("/"),
+      children: [],
+    };
+
+    current.children.push(child);
+    current = child;
+  }
+
+  globalThis.fetch = async () => responseWithJson(document);
+
+  try {
+    await module.loadLibrary();
+
+    assert.deepEqual(
+      module.getTopicTrail("topic_10").map((topic) => topic.id),
+      Array.from({ length: 10 }, (_, index) => `topic_${index + 1}`)
+    );
+
+    assert.deepEqual(module.getTopicTrail("topic_1").map((topic) => topic.id), [
+      "topic_1",
+    ]);
+
+    assert.deepEqual(module.getTopicTrail("root"), []);
+    assert.deepEqual(module.getTopicTrail("missing"), []);
+  } finally {
+    globalThis.fetch = originalFetch;
+    await cleanup();
+  }
+});
