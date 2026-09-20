@@ -30,6 +30,7 @@ M4 — Topics and subtopics — IN PROGRESS
 - M3.3 — route-aware Home and Not Found pages
 - M3.4 — Topic/Track ID resolution, direct URL and refresh verification
 - M4.1 — root Topic presentation and reusable TopicCard
+- M4.2 — nested child Topics on TopicPage and empty states
 
 ## M3.4 result
 - Added minimal `TopicPage` and `TrackPage` route targets
@@ -126,6 +127,40 @@ Regression:
 - App routing: 7/7 PASS
 - M3 integration: 4/4 PASS
 
+## M4.2 result
+- `TopicPage` now renders its direct child Topics through the same reusable `TopicCard`
+- Clicking a child Topic routes back into the same `TopicPage` mechanism for that child
+- The implementation is depth-independent and makes no assumptions about hierarchy depth
+- Added a true empty-Topic state: `אין עדיין תוכן בנושא זה.`
+- Added a separate no-subtopics state for Topics that contain other content but no child Topics
+- Added a styled Home back link
+- Tracks remain intentionally excluded from Topic UI until M5
+- No Breadcrumb or M4.3 work was added
+
+## M4.2 automated verification
+GitHub Actions `Test App`: PASS
+
+M4 Topic tests:
+- tests: 9
+- pass: 9
+- fail: 0
+
+New M4.2 coverage:
+- real nested sample Topic exposes its child Topic: PASS
+- child Topic route round-trip: PASS
+- TopicPage renders only direct child Topics: PASS
+- reusable TopicCard is used: PASS
+- true empty-Topic state: PASS
+- no-subtopics state: PASS
+- no Track UI leakage: PASS
+- depth-independent TopicPage structure: PASS
+
+Regression:
+- Library Service: 9/9 PASS
+- Router: 11/11 PASS
+- App routing: 7/7 PASS
+- M3 integration: 4/4 PASS
+
 ## Sample content
 - 2 top-level sample topics
 - 1 nested subtopic
@@ -143,7 +178,7 @@ Regression:
 GitHub Pages workflow remains configured and active.
 
 ## Next
-M4.2 — make `TopicPage` render its child Topics recursively through the same reusable `TopicCard`, with an explicit empty-Topic state. Do not add Track lists yet.
+M4.3 — add Breadcrumb navigation for arbitrary Topic depth and verify deep hierarchy navigation/back behavior. Do not add Track lists yet.
 
 
 ## Working rule
