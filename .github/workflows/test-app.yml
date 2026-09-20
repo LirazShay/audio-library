@@ -6,6 +6,7 @@ on:
       - main
     paths:
       - src/app/**
+      - src/styles/**
       - src/data/library.json
       - tools/library-service.test.mjs
       - tools/router-service.test.mjs
@@ -16,10 +17,12 @@ on:
       - tools/audio-service.test.mjs
       - tools/m6-track-page.test.mjs
       - tools/m7-player.test.mjs
+      - tools/m7-final.test.mjs
       - .github/workflows/test-app.yml
   pull_request:
     paths:
       - src/app/**
+      - src/styles/**
       - src/data/library.json
       - tools/library-service.test.mjs
       - tools/router-service.test.mjs
@@ -30,6 +33,7 @@ on:
       - tools/audio-service.test.mjs
       - tools/m6-track-page.test.mjs
       - tools/m7-player.test.mjs
+      - tools/m7-final.test.mjs
       - .github/workflows/test-app.yml
   workflow_dispatch:
 
@@ -113,6 +117,9 @@ jobs:
 
       - name: Run M7 Player tests
         run: node --test tools/m7-player.test.mjs
+
+      - name: Run M7 final DoD tests
+        run: node --test tools/m7-final.test.mjs
 
       - name: Check M6.1 Audio startup wiring
         run: |
