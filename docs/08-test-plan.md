@@ -1746,39 +1746,60 @@ Blocker ל־Release:
 
 # 126. Test Automation Scope ל־V1
 
-אוטומציה מומלצת:
+האוטומציה בפועל כוללת כיום:
 
 ```text
 Generator
-Pure utility functions
-Router parsing
-Listening mode logic
-Search normalization
-Storage parsing
+Library Service
+Router
+Application routing
+Player/Audio Service
+Local media server
+Documentation contract
+Playwright browser E2E
 ```
 
-לא חובה ב־V1:
-- full browser E2E framework.
-- screenshot regression.
+Playwright הוא כעת חלק מה־CI הפעיל, ולא רק תכנון עתידי.
+
+לא נדרש כרגע:
+- Selenium Grid.
 - cloud device farm.
+- Visual Regression SaaS.
 
 ---
 
-# 127. E2E עתידי
+# 127. Browser E2E — מיושם
 
-אם הפרויקט גדל:
+Playwright מריץ Chromium אמיתי במצב Headless בתוך GitHub Actions.
 
-אפשר להוסיף Playwright עבור flows מרכזיים:
+ה־flows הנוכחיים כוללים:
 
 ```text
 open app
 navigate topic
-open track
-favorite
-search
+open real Track
+load real WAV metadata
+play real audio
+verify visible current time advances
+verify seek advances
+verify percentage advances
+seek
+speed
+repeat
+desktop mute
+mobile responsive checks
 ```
 
-Audio playback עצמו עדיין דורש בדיקות ידניות בחלק מהמקרים.
+הרצה מתבצעת בשני projects:
+
+```text
+desktop-chromium
+mobile-chromium
+```
+
+בדיקה ידנית אינה נדרשת כ־gate שגרתי להתנהגות אובייקטיבית שכבר מכוסה ב־E2E.
+
+בדיקה ידנית עדיין רלוונטית לשיפוט חזותי/UX או לתקלה ספציפית לסביבה שאינה משתחזרת ב־CI.
 
 ---
 
