@@ -14,4 +14,28 @@
   .player-volume {
     display: inline-flex;
   }
+
+  .basic-player {
+    padding: var(--space-6);
+  }
+
+  .basic-player__progress {
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    gap: var(--space-3);
+  }
+
+  .basic-player__time:first-child {
+    grid-column: 1;
+    grid-row: 1;
+  }
+
+  .basic-player__range {
+    grid-column: 2;
+    grid-row: 1;
+  }
+
+  .basic-player__time:last-child {
+    grid-column: 3;
+    grid-row: 1;
+  }
 }
