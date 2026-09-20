@@ -339,3 +339,39 @@
 .player-volume__range {
   width: 8rem;
 }
+
+
+.player-visualization {
+  display: grid;
+  place-items: center;
+}
+
+.player-visualization__ring {
+  --player-progress-angle: 0deg;
+  display: grid;
+  width: 7rem;
+  aspect-ratio: 1;
+  place-items: center;
+  border-radius: 50%;
+  background:
+    radial-gradient(
+      circle at center,
+      var(--color-surface) 0 62%,
+      transparent 63%
+    ),
+    conic-gradient(
+      var(--color-accent) var(--player-progress-angle),
+      var(--color-border) 0
+    );
+}
+
+.player-visualization__value {
+  color: var(--color-text);
+  font-size: 1rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.player-nav-placeholder {
+  min-width: 4.75rem;
+}
