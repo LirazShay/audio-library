@@ -39,9 +39,17 @@ export function validateLibraryDocument(document) {
 }
 
 async function fetchLibrary() {
-  const response = await fetch(LIBRARY_URL, {
-    cache: "no-cache",
-  });
+  let response;
+
+  try {
+    response = await fetch(LIBRARY_URL, {
+      cache: "no-cache",
+    });
+  } catch (error) {
+    throw new Error("Unable to load library.json: network request failed.", {
+      cause: error,
+    });
+  }
 
   if (!response.ok) {
     throw new Error(
@@ -49,9 +57,19 @@ async function fetchLibrary() {
     );
   }
 
-  const document = validateLibraryDocument(await response.json());
-  loadedLibrary = document;
-  return document;
+  let document;
+
+  try {
+    document = await response.json();
+  } catch (error) {
+    throw new Error("Unable to load library.json: invalid JSON.", {
+      cause: error,
+    });
+  }
+
+  const validatedDocument = validateLibraryDocument(document);
+  loadedLibrary = validatedDocument;
+  return validatedDocument;
 }
 
 export function loadLibrary() {
