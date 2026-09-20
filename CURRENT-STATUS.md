@@ -47,6 +47,12 @@ M2 — Library Loader
 - Unsupported `schemaVersion` rejection test: PASS
 - Test App workflow: PASS
 
+## Local preview bugfix
+- Fixed `main.js` to mount `App` as a real Preact component with `render(h(App, null), root)`
+- This restores Signals reactivity after asynchronous library loading
+- Added a CI guard so the app cannot regress to calling `App()` directly
+- Test App workflow: PASS
+
 ## Next
 M2.2 — build the in-memory indexes (`tracksById`, `topicsById`) and expose `getRoot()`, `getTopic(id)`, `getTrack(id)`, `getAllTracks()`, and `getAllTopics()` without adding routing or content pages yet.
 
