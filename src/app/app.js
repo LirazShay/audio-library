@@ -1,5 +1,6 @@
 import { html } from "htm/preact";
 import { appStatus, library, libraryError } from "./state/app-state.js";
+import { getAllTopics, getAllTracks } from "./services/library-service.js";
 
 function renderStatus() {
   if (appStatus.value === "loading") {
@@ -15,12 +16,12 @@ function renderStatus() {
     `;
   }
 
-  const loadedLibrary = library.value;
-  const rootItems = loadedLibrary?.root?.children?.length ?? 0;
+  const topicCount = getAllTopics().length;
+  const trackCount = getAllTracks().length;
 
   return html`
     <p class="welcome-status" role="status">
-      הספרייה נטענה בהצלחה · ${rootItems} פריטים ברמה הראשית
+      הספרייה נטענה בהצלחה · ${topicCount} נושאים · ${trackCount} קטעים
     </p>
   `;
 }
