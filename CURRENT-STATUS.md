@@ -9,7 +9,7 @@ Implementation in progress.
 ## Current milestone
 M2 — Library Loader — COMPLETE
 
-M3 — Router and basic navigation — NOT STARTED
+M3 — Router and basic navigation — IN PROGRESS
 
 ## Completed
 - Product Requirements
@@ -27,6 +27,7 @@ M3 — Router and basic navigation — NOT STARTED
 - M2.1 — single-load library fetch, envelope validation, and app loading state
 - M2.2 — recursive in-memory Topic/Track indexes and lookup API
 - M2.3 — loaded-state Topic/Track totals and full M2 regression pass
+- M3.1 — pure hash route parsing/building contract
 
 ## M2.3 result
 - Basic loaded-state UI now uses the Library Service API instead of counting root children
@@ -84,6 +85,41 @@ Final regression checks:
 - network failure is handled as controlled error state: PASS
 - automated regression suite passes: PASS
 
+## M3.1 result
+- Added `src/app/services/router-service.js`
+- Added route names for `home`, `topic`, `track`, and `not-found`
+- Added pure `parseRoute(hash)`
+- Added pure `buildRoute(name, params)`
+- Home accepts `""`, `"#"`, and `"#/"`
+- Topic route format: `#/topic/:id`
+- Track route format: `#/track/:id`
+- Route IDs are URL encoded/decoded safely
+- Unknown, malformed, missing-ID, and bad-percent-encoding routes resolve to `not-found`
+- Unsupported route names and missing IDs are rejected when building routes
+- No browser event wiring, Signals, navigation side effects, pages, or M3.2 work was added
+
+## M3.1 automated verification
+GitHub Actions `Test App`: PASS
+
+Router tests:
+- tests: 7
+- pass: 7
+- fail: 0
+
+Coverage:
+- Home parsing: PASS
+- Topic parsing: PASS
+- Track parsing: PASS
+- invalid route handling: PASS
+- Home/Topic/Track route building: PASS
+- missing ID rejection: PASS
+- Unicode/space ID round-trip: PASS
+
+Existing Library Service regression:
+- tests: 9
+- pass: 9
+- fail: 0
+
 ## Sample content
 - 2 top-level sample topics
 - 1 nested subtopic
@@ -100,8 +136,11 @@ Final regression checks:
 GitHub Pages workflow remains configured and active.
 
 ## Next
-M3 — Router and basic navigation has not started. Do not begin it until the next explicit stage command after local M2 verification.
+M3.2 — connect the pure router contract to browser state: current route Signal, startup from `window.location.hash`, `hashchange`, and `navigate()`. Do not add page rendering yet.
+
 
 ## Working rule
-Each future "Continue to the next stage" command advances one logical sub-stage.
+Each future "Continue to the next stage" command advances exactly one logical sub-stage.
+Milestones M3 through M7 may be split into as many sub-stages as needed for quality.
+Do not report final completion until M7 is fully complete and verified.
 GitHub is the source of truth.
