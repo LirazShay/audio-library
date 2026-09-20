@@ -32,10 +32,12 @@ tools\local-check.cmd
 
 It intentionally supports media byte ranges.
 
-A valid range request should return:
+A valid range request should return HTTP `206 Partial Content`.
+
+Expected response shape:
 
 ```text
-HTTP 206
+HTTP 206 Partial Content
 Accept-Ranges: bytes
 Content-Range: bytes ...
 Content-Length: ...
