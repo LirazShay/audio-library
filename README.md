@@ -2,20 +2,49 @@
 
 ספריית שמע דינמית מבוססת קבצים.
 
+## עבודה עם ChatGPT / מעבר בין צ׳אטים
+
+ה־repository הוא הזיכרון הקבוע של הפרויקט.
+
+בכל צ׳אט חדש, נקודת הכניסה היא:
+
+```text
+AI-START-HERE.md
+```
+
+אחריו יש לקרוא:
+
+```text
+CURRENT-STATUS.md
+docs/00-project-index.md
+docs/11-current-implementation.md
+docs/12-development-workflow.md
+```
+
+המטרה היא שצ׳אט חדש יוכל להמשיך את הפרויקט בלי לקבל סיכום ידני של הצ׳אט הקודם.
+
 ## מקור האמת של הפרויקט
 
-כל מסמכי האפיון והפיתוח נמצאים תחת `/docs`.
+מסמכי האפיון והפיתוח נמצאים תחת `/docs`.
 
-לפני עבודה על Milestone חדש יש לקרוא:
-1. `CURRENT-STATUS.md`
-2. `docs/07-development-plan.md`
-3. את מסמכי האפיון הרלוונטיים לשלב
+מקור האמת למצב הפעיל:
+- `CURRENT-STATUS.md`
+
+החלטות ארכיטקטוניות:
+- `docs/13-decisions-log.md`
+
+ידע בדיקות ותקלות:
+- `docs/14-testing-troubleshooting.md`
+
+פרוטוקול handoff:
+- `docs/15-chat-handoff-protocol.md`
 
 ## מבנה בסיסי
 
 ```text
 /
-├── src/                  # כל מה שנפרס לאתר
+├── AI-START-HERE.md       # נקודת כניסה יציבה לכל צ׳אט AI חדש
+├── src/                   # כל מה שנפרס לאתר
 │   ├── index.html
 │   ├── 404.html
 │   ├── app/
@@ -23,10 +52,10 @@
 │   ├── content/
 │   ├── data/
 │   └── config/
-├── tools/                # כלי פיתוח ו-Generator
-├── docs/                 # מסמכי הפרויקט
-├── .github/workflows/    # Deployment
-├── CURRENT-STATUS.md
+├── tools/                 # כלי פיתוח, Generator ובדיקות
+├── docs/                  # אפיון + continuity documentation
+├── .github/workflows/     # CI / Deployment
+├── CURRENT-STATUS.md      # מצב פעיל + next action
 └── README.md
 ```
 
@@ -34,111 +63,93 @@
 
 האתר הוא Static Web App ללא Build.
 
-מתיקיית הפרויקט:
+הדרך המועדפת ב־Windows:
 
-```bash
-python -m http.server 8080 --directory src
-```
-
-ואז לפתוח:
-
-```text
-http://localhost:8080/
-```
-
-אין להפעיל את `src/index.html` ישירות דרך `file://`.
-
-
-## בדיקה מקומית ב-Windows
-
-נוספו כלי בדיקה מקומיים תחת `tools/`.
-
-### בדיקת Generator בלבד
-
-אפשר ללחוץ פעמיים על:
-
-```text
-tools/local-check.cmd
+```cmd
+tools\update-and-preview.cmd
 ```
 
 הסקריפט:
+1. מושך את השינויים האחרונים עם `git pull --ff-only`
+2. מריץ local checks
+3. עוצר שרת ישן שמאזין על פורט 8080
+4. מפעיל שרת Node חדש
+5. פותח את הדפדפן
 
-1. מריץ את כל בדיקות ה-Generator.
-2. מריץ את ה-Generator על `src/content/`.
-3. מעדכן את `src/data/library.json`.
-4. עוצר ומציג שגיאה אם בדיקה או פעולה קריטית נכשלו.
-
-### הורדה מ-GitHub + בדיקה + Preview בדפדפן
-
-אפשר ללחוץ פעמיים על:
+URL:
 
 ```text
-tools/update-and-preview.cmd
+http://127.0.0.1:8080/
 ```
 
-הסקריפט מבצע:
+## בדיקות מקומיות
 
-```text
-git pull --ff-only
-        ↓
-Generator tests
-        ↓
-Generate library.json
-        ↓
-Local Node HTTP server
-        ↓
-Open http://127.0.0.1:8080/
+```cmd
+tools\local-check.cmd
 ```
 
-נדרש רק:
+ה־local checks כוללים:
+- Generator tests
+- local media-server tests
+- יצירה מחדש של `src/data/library.json`
 
-- Git
-- Node.js
-
-אין צורך ב-Python, npm install או חבילת שרת חיצונית.
-
-השרת המקומי הוא:
+שרת המדיה המקומי:
 
 ```text
 tools/dev-server.js
 ```
 
-וניתן גם להריץ אותו ידנית:
+הרצה ידנית:
 
-```bash
-node tools/dev-server.js
+```cmd
+node tools\dev-server.js
 ```
 
+השרת תומך ב־HTTP byte ranges כדי ש־HTMLAudioElement, seek ו־timeline יעבדו כמו מול שרת מדיה תקין.
+
+## Content / Generator
+
+מקור התוכן:
+
+```text
+src/content/
+```
+
+ה־Generator:
+
+```text
+tools/generate-library.js
+```
+
+הקובץ שנוצר:
+
+```text
+src/data/library.json
+```
+
+אין לערוך את `library.json` ידנית כחלק מזרימת תוכן רגילה.
 
 ## Deployment
 
-GitHub Pages נפרס באמצעות GitHub Actions.
-
-ה־workflow:
+GitHub Pages נפרס באמצעות:
 
 ```text
 .github/workflows/deploy-pages.yml
 ```
 
-מפרסם רק את:
+מפורסם רק:
 
 ```text
 src/
 ```
 
-לכן `docs/`, `tools/`, `CURRENT-STATUS.md` ושאר קבצי הפיתוח אינם חלק מהאתר שנפרס.
+לכן `docs/`, `tools/`, `AI-START-HERE.md`, `CURRENT-STATUS.md` ושאר קבצי הפיתוח אינם חלק מהאתר שנפרס.
 
-## Runtime data
-
-קבצי Runtime נשמרים בתוך `src/`:
+Production:
 
 ```text
-src/content/   # קבצי שמע וטקסט
-src/data/      # JSON שנוצר, למשל library.json
-src/config/    # הגדרות Runtime של האתר
+https://lirazshay.github.io/audio-library/
 ```
-
-אין JSON Runtime ברוט של ה־repository.
 
 ## טכנולוגיות בסיס
 
@@ -148,13 +159,17 @@ src/config/    # הגדרות Runtime של האתר
 - Browser ES Modules
 - Import Maps
 - Plain CSS
+- HTMLAudioElement
+- GitHub Pages
 
-## עקרונות
+## עקרונות חשובים
 
 - Static client-side web app
-- GitHub Pages
 - תוכן מתוך תיקיות וקבצי שמע/TXT
-- Generator ייצור `src/data/library.json`
-- ללא Backend בגרסה הראשונה
-- ללא Build מורכב
-- פיתוח לפי Milestones
+- Generator יוצר את `library.json`
+- Audio גלובלי יחיד
+- Player State מרכזי
+- UI לא משנה את Audio element ישירות
+- ללא Backend בגרסה הנוכחית
+- פיתוח לפי Milestones ותתי־שלבים
+- GitHub הוא מקור האמת בין צ׳אטים
