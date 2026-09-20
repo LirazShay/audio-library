@@ -288,3 +288,51 @@ This keeps implementation, tests, documentation, and review bounded and recovera
 
 ### Consequences
 Formal milestones may be split into Mx.1, Mx.2, etc.
+
+
+---
+
+## D-016 — Playwright Headless E2E is the browser behavior gate
+
+**Status:** Accepted  
+**Documented:** 2026-09-20
+
+### Decision
+Critical browser-observable behavior is verified automatically with Playwright running real Chromium in headless mode in GitHub Actions.
+
+### Current matrix
+- desktop Chromium
+- mobile Chromium emulation
+
+### Why
+Unit/service tests can prove state logic but cannot prove that the real browser renders and advances the player correctly.
+
+The 0%-progress incident demonstrated this gap.
+
+### Required use
+Critical flows that can be objectively asserted in a browser should prefer E2E coverage instead of routine manual verification.
+
+Examples:
+- navigation
+- Play/Pause
+- visible time/progress
+- seek
+- speed
+- repeat
+- responsive overflow
+
+### Manual testing policy
+Manual verification is still appropriate for:
+- subjective visual quality
+- human UX judgement
+- device/browser-specific issues not represented in CI
+- bugs that the user can reproduce locally but CI cannot
+
+Do not claim a manual check occurred when only Playwright passed.
+
+However, a passing browser E2E may replace manual testing as the normal release gate for the exact objective behavior it covers.
+
+### References
+- `e2e/player.spec.js`
+- `playwright.config.cjs`
+- `.github/workflows/test-e2e.yml`
