@@ -404,3 +404,28 @@ test("play promise rejection becomes a controlled player error", async () => {
     await cleanup();
   }
 });
+
+
+test("MP3 and M4A Track sources are accepted by the Audio service", async () => {
+  const { service, cleanup } = await importFreshAudioService("common-formats");
+  const audio = new FakeAudio();
+
+  try {
+    service.initializeAudioService(audio);
+
+    const mp3Source = service.loadTrack(
+      createTrack("track_mp3", "content/נושא/קטע.mp3")
+    );
+    assert.match(mp3Source, /\.mp3$/);
+
+    const m4aSource = service.loadTrack(
+      createTrack("track_m4a", "content/נושא/קטע.m4a")
+    );
+    assert.match(m4aSource, /\.m4a$/);
+
+    assert.equal(service.getAudioElement(), audio);
+    assert.equal(audio.loadCount, 2);
+  } finally {
+    await cleanup();
+  }
+});
