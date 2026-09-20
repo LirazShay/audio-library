@@ -13,6 +13,8 @@ class FakeAudio {
     this.preload = "";
     this.playbackRate = 1;
     this.volume = 1;
+    this.muted = false;
+    this.loop = false;
     this.duration = Number.NaN;
     this.currentTime = 0;
     this.src = "";
@@ -87,6 +89,8 @@ export const currentTime = { value: 0 };
 export const duration = { value: 0 };
 export const playbackRate = { value: 1 };
 export const volume = { value: 1 };
+export const muted = { value: false };
+export const repeatTrack = { value: false };
 export const playerError = { value: null };
 `;
 
@@ -130,6 +134,8 @@ test("initializeAudioService creates one shared Audio instance", async () => {
     assert.equal(firstAudio.preload, "metadata");
     assert.equal(firstAudio.playbackRate, 1);
     assert.equal(firstAudio.volume, 1);
+    assert.equal(firstAudio.muted, false);
+    assert.equal(firstAudio.loop, false);
     assert.equal(secondAudio.listeners.size, 0);
   } finally {
     await cleanup();
@@ -425,6 +431,100 @@ test("MP3 and M4A Track sources are accepted by the Audio service", async () => 
 
     assert.equal(service.getAudioElement(), audio);
     assert.equal(audio.loadCount, 2);
+  } finally {
+    await cleanup();
+  }
+});
+
+
+test("setRate applies only supported playback speeds", async () => {
+  const { service, state, cleanup } = await importFreshAudioService("rate");
+  const audio = new FakeAudio();
+
+  try {
+    service.initializeAudioService(audio);
+
+    for (const rate of service.PLAYBACK_RATES) {
+      assert.equal(service.setRate(rate), rate);
+      assert.equal(audio.playbackRate, rate);
+      assert.equal(state.playbackRate.value, rate);
+    }
+
+    assert.throws(() => service.setRate(1.1), /Unsupported playback rate/);
+    assert.throws(() => service.setRate(Number.NaN), /Unsupported playback rate/);
+  } finally {
+    await cleanup();
+  }
+});
+
+test("setVolume clamps values and synchronizes Audio with player state", async () => {
+  const { service, state, cleanup } = await importFreshAudioService("volume");
+  const audio = new FakeAudio();
+
+  try {
+    service.initializeAudioService(audio);
+
+    assert.equal(service.setVolume(0.4), 0.4);
+    assert.equal(audio.volume, 0.4);
+    assert.equal(state.volume.value, 0.4);
+
+    assert.equal(service.setVolume(5), 1);
+    assert.equal(audio.volume, 1);
+    assert.equal(state.volume.value, 1);
+
+    assert.equal(service.setVolume(-2), 0);
+    assert.equal(audio.volume, 0);
+    assert.equal(state.volume.value, 0);
+
+    assert.throws(() => service.setVolume(Number.NaN), /finite number/);
+  } finally {
+    await cleanup();
+  }
+});
+
+test("mute controls synchronize the shared Audio and player state", async () => {
+  const { service, state, cleanup } = await importFreshAudioService("mute");
+  const audio = new FakeAudio();
+
+  try {
+    service.initializeAudioService(audio);
+
+    assert.equal(service.setMuted(true), true);
+    assert.equal(audio.muted, true);
+    assert.equal(state.muted.value, true);
+
+    assert.equal(service.toggleMute(), false);
+    assert.equal(audio.muted, false);
+    assert.equal(state.muted.value, false);
+
+    assert.throws(() => service.setMuted("yes"), /must be boolean/);
+  } finally {
+    await cleanup();
+  }
+});
+
+test("repeat-current maps to Audio loop and resets when a new Track loads", async () => {
+  const { service, state, cleanup } = await importFreshAudioService("repeat");
+  const audio = new FakeAudio();
+
+  try {
+    service.initializeAudioService(audio);
+    service.loadTrack(createTrack("track_1"));
+
+    assert.equal(service.setRepeatTrack(true), true);
+    assert.equal(audio.loop, true);
+    assert.equal(state.repeatTrack.value, true);
+
+    service.loadTrack(createTrack("track_2"));
+
+    assert.equal(audio.loop, false);
+    assert.equal(state.repeatTrack.value, false);
+
+    assert.equal(service.setRepeatTrack(false), false);
+    assert.equal(audio.loop, false);
+    assert.equal(state.repeatTrack.value, false);
+
+    assert.throws(() => service.setRepeatTrack(1), /must be boolean/);
   } finally {
     await cleanup();
   }
