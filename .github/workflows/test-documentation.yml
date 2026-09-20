@@ -1,0 +1,36 @@
+name: Test Documentation Contract
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - AI-START-HERE.md
+      - CURRENT-STATUS.md
+      - README.md
+      - docs/**
+      - tools/documentation-contract.test.js
+      - .github/workflows/test-documentation.yml
+  pull_request:
+    paths:
+      - AI-START-HERE.md
+      - CURRENT-STATUS.md
+      - README.md
+      - docs/**
+      - tools/documentation-contract.test.js
+      - .github/workflows/test-documentation.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Validate cross-chat documentation contract
+        run: node --test tools/documentation-contract.test.js
