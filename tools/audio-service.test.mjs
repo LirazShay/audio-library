@@ -529,3 +529,64 @@ test("repeat-current maps to Audio loop and resets when a new Track loads", asyn
     await cleanup();
   }
 });
+
+
+test("animation-frame progress sync updates currentTime even without timeupdate", async () => {
+  const originalRequestAnimationFrame = globalThis.requestAnimationFrame;
+  const originalCancelAnimationFrame = globalThis.cancelAnimationFrame;
+  const queuedFrames = new Map();
+  let nextFrameId = 1;
+
+  globalThis.requestAnimationFrame = (callback) => {
+    const id = nextFrameId++;
+    queuedFrames.set(id, callback);
+    return id;
+  };
+
+  globalThis.cancelAnimationFrame = (id) => {
+    queuedFrames.delete(id);
+  };
+
+  const { service, state, cleanup } = await importFreshAudioService("raf-progress");
+  const audio = new FakeAudio();
+
+  try {
+    service.initializeAudioService(audio);
+    service.loadTrack(createTrack());
+
+    audio.duration = 60;
+    audio.emit("loadedmetadata");
+
+    await service.play();
+
+    assert.equal(queuedFrames.size, 1);
+
+    audio.currentTime = 7.25;
+
+    const [frameId, frameCallback] = queuedFrames.entries().next().value;
+    queuedFrames.delete(frameId);
+    frameCallback();
+
+    assert.equal(state.currentTime.value, 7.25);
+    assert.equal(queuedFrames.size, 1);
+
+    service.pause();
+
+    assert.equal(state.isPlaying.value, false);
+    assert.equal(queuedFrames.size, 0);
+  } finally {
+    if (originalRequestAnimationFrame === undefined) {
+      delete globalThis.requestAnimationFrame;
+    } else {
+      globalThis.requestAnimationFrame = originalRequestAnimationFrame;
+    }
+
+    if (originalCancelAnimationFrame === undefined) {
+      delete globalThis.cancelAnimationFrame;
+    } else {
+      globalThis.cancelAnimationFrame = originalCancelAnimationFrame;
+    }
+
+    await cleanup();
+  }
+});
