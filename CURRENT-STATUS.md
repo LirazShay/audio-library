@@ -9,7 +9,7 @@ Implementation in progress.
 ## Current milestone
 M3 — Router and basic navigation — COMPLETE
 
-M4 — Topics and subtopics — NOT STARTED
+M4 — Topics and subtopics — IN PROGRESS
 
 ## Completed
 - Product Requirements
@@ -29,6 +29,7 @@ M4 — Topics and subtopics — NOT STARTED
 - M3.2 — browser hash runtime and current route Signal
 - M3.3 — route-aware Home and Not Found pages
 - M3.4 — Topic/Track ID resolution, direct URL and refresh verification
+- M4.1 — root Topic presentation and reusable TopicCard
 
 ## M3.4 result
 - Added minimal `TopicPage` and `TrackPage` route targets
@@ -91,6 +92,40 @@ Integration coverage:
 - existing M2 behavior remains green: PASS
 - automated M3 regression suite passes: PASS
 
+## M4.1 result
+- Added reusable `src/app/components/topic-card.js`
+- `TopicCard` builds its href through the Router contract with `buildRoute(ROUTE_NAMES.TOPIC, ...)`
+- Home now reads the logical root through `getRoot()`
+- Home filters and displays only root-level Topic children
+- Root-level Tracks remain intentionally excluded until M5
+- Current sample content renders 2 root Topics
+- Added a mobile-first Topic grid
+- Added a 2-column desktop Topic grid
+- Added an empty-state message when the root has no Topics
+- No child-Topic browsing, Breadcrumb, deep hierarchy rendering, Track lists, or M5 work was added
+
+## M4.1 automated verification
+GitHub Actions `Test App`: PASS
+
+M4 Topic tests:
+- tests: 5
+- pass: 5
+- fail: 0
+
+Coverage:
+- real sample library has 2 root Topics: PASS
+- each root Topic builds a valid Topic route: PASS
+- Home renders only root Topics through `TopicCard`: PASS
+- Track UI does not leak into M4.1: PASS
+- TopicCard uses Router contract: PASS
+- mobile-first + desktop Topic grid styles: PASS
+
+Regression:
+- Library Service: 9/9 PASS
+- Router: 11/11 PASS
+- App routing: 7/7 PASS
+- M3 integration: 4/4 PASS
+
 ## Sample content
 - 2 top-level sample topics
 - 1 nested subtopic
@@ -108,7 +143,8 @@ Integration coverage:
 GitHub Pages workflow remains configured and active.
 
 ## Next
-M4 — Topics and subtopics has not started. The next explicit stage command should begin M4.1 with root Topic presentation and reusable Topic navigation UI, without adding Track-list behavior from M5.
+M4.2 — make `TopicPage` render its child Topics recursively through the same reusable `TopicCard`, with an explicit empty-Topic state. Do not add Track lists yet.
+
 
 ## Working rule
 Each future "Continue to the next stage" command advances exactly one logical sub-stage.
