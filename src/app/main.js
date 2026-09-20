@@ -1,4 +1,4 @@
-import { render } from "preact";
+import { h, render } from "preact";
 import { App } from "./app.js";
 import { initializeApp } from "./state/app-state.js";
 
@@ -8,7 +8,7 @@ if (!root) {
   throw new Error('Missing application root element "#app".');
 }
 
-render(App(), root);
+render(h(App, null), root);
 
 initializeApp().catch((error) => {
   console.error("Application initialization failed.", error);
