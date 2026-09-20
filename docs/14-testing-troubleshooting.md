@@ -103,13 +103,26 @@ At documentation time:
 - M7 final DoD: 15/15 PASS
 - full application regression: PASS
 
-### Manual verification state
+### Browser verification state
 
-**PENDING USER CONFIRMATION**
+**HEADLESS BROWSER E2E: PASS**
 
-The user reported the issue before the Range/restart corrections were manually confirmed in their browser.
+Playwright now verifies in real Chromium that:
+- the real WAV duration loads
+- playback starts
+- visible current time advances above 0
+- seek slider advances
+- visible percentage advances above 0
 
-Do not claim the incident is fully closed until the user confirms visible progress moves locally.
+This passes in both desktop and mobile Chromium projects.
+
+### Manual local verification state
+
+**USER LOCAL CONFIRMATION: PENDING, BUT NO LONGER A ROUTINE BLOCKER**
+
+Do not claim a manual local check occurred.
+
+The browser-visible behavior itself is now covered automatically in GitHub Actions. If the user still reproduces the bug locally, treat that as a local/environment-specific incident and continue with the diagnostic plan below.
 
 ### Exact next diagnostic if still broken
 
@@ -275,3 +288,91 @@ A bug reproduced only in production may be:
 - hosting behavior
 
 Always record where the bug was reproduced.
+
+
+## 12. Playwright browser E2E
+
+Workflow:
+
+```text
+.github/workflows/test-e2e.yml
+```
+
+Tests:
+
+```text
+e2e/player.spec.js
+```
+
+Configuration:
+
+```text
+playwright.config.cjs
+```
+
+### CI behavior
+
+GitHub Actions:
+
+1. installs Node.js
+2. installs `@playwright/test`
+3. installs Chromium and required Linux dependencies
+4. regenerates library data
+5. starts `tools/dev-server.js` through Playwright's webServer support
+6. runs desktop + mobile headless browser tests
+
+### Failure artifacts
+
+On failure GitHub uploads:
+
+- Playwright HTML report
+- screenshots
+- traces
+- videos
+
+Use the trace first when debugging an E2E failure.
+
+### Local commands
+
+Install once:
+
+```cmd
+npm install
+npx playwright install chromium
+```
+
+Run all:
+
+```cmd
+npm run test:e2e
+```
+
+Desktop only:
+
+```cmd
+npm run test:e2e:desktop
+```
+
+Mobile only:
+
+```cmd
+npm run test:e2e:mobile
+```
+
+### Current verified result
+
+GitHub Actions run `35513341376`:
+
+```text
+8 passed
+desktop-chromium: 4/4
+mobile-chromium: 4/4
+```
+
+The test named:
+
+```text
+real audio playback advances time seek and percentage in the browser
+```
+
+directly covers the previously manual 0%-progress verification.
