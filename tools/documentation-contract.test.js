@@ -85,8 +85,9 @@ test("README makes cross-chat bootstrap discoverable", () => {
 
 test("implementation snapshot captures critical architecture invariants", () => {
   assert.match(implementation, /exactly one shared/i);
-  assert.match(implementation, /Audio Service owns Audio-element mutations/i);
   includesAll(implementation, [
+    "UI components must use Audio Service APIs",
+    "must not directly set properties on the Audio element",
     "requestAnimationFrame",
     "HTTP byte ranges",
     "M8 Mini/global player",
