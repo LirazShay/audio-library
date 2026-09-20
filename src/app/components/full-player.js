@@ -56,6 +56,8 @@ export function FullPlayer({ track }) {
   const currentVolume = volume.value;
   const isMuted = muted.value;
   const repeating = isCurrentTrack && repeatTrack.value;
+  const isLoading = status === "loading";
+  const isBusy = isLoading || status === "buffering";
 
   function handlePlayPause() {
     if (!isCurrentTrack) {
@@ -87,14 +89,23 @@ export function FullPlayer({ track }) {
   }
 
   return html`
-    <section class="basic-player" aria-label="נגן שמע">
+    <section
+      class="basic-player"
+      aria-label="נגן שמע"
+      aria-busy=${isBusy}
+      data-player-status=${status}
+    >
       <${PlayerVisualization}
         currentTime=${time}
         duration=${totalDuration}
         status=${status}
       />
 
-      <div class="basic-player__controls">
+      <div
+        class="basic-player__controls"
+        role="group"
+        aria-label="פקדי ניגון"
+      >
         <button
           type="button"
           class="player-button player-button--secondary player-nav-placeholder"
@@ -119,9 +130,10 @@ export function FullPlayer({ track }) {
           type="button"
           class="player-button player-button--primary"
           onClick=${handlePlayPause}
-          aria-label=${playing ? "השהה" : "נגן"}
+          disabled=${isLoading}
+          aria-label=${isLoading ? "טוען את קובץ השמע" : playing ? "השהה" : "נגן"}
         >
-          ${playing ? "השהה" : "נגן"}
+          ${isLoading ? "טוען…" : playing ? "השהה" : "נגן"}
         </button>
 
         <button
@@ -152,7 +164,11 @@ export function FullPlayer({ track }) {
         onSeek=${seek}
       />
 
-      <div class="player-advanced-controls">
+      <div
+        class="player-advanced-controls"
+        role="group"
+        aria-label="הגדרות נגן"
+      >
         <label class="player-setting">
           <span>מהירות</span>
           <select
@@ -179,7 +195,11 @@ export function FullPlayer({ track }) {
           חזור על הקטע
         </button>
 
-        <div class="player-volume" aria-label="עוצמת שמע">
+        <div
+          class="player-volume"
+          role="group"
+          aria-label="עוצמת שמע"
+        >
           <button
             type="button"
             class="player-button player-button--secondary player-mute"
@@ -213,7 +233,16 @@ export function FullPlayer({ track }) {
 
       ${error
         ? html`
-            <p class="player-error" role="alert">${error}</p>
+            <div class="player-error" role="alert">
+              <span>${error}</span>
+              <button
+                type="button"
+                class="player-button player-button--secondary player-retry"
+                onClick=${() => loadTrack(track)}
+              >
+                נסה שוב
+              </button>
+            </div>
           `
         : null}
     </section>
