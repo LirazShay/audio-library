@@ -182,3 +182,23 @@ test("startRouter and navigate reject missing browser dependencies", () => {
     /browser-like window object/
   );
 });
+
+
+test("back-style hashchange from nested Topic returns to its parent route", () => {
+  const fakeWindow = createFakeWindow("#/topic/topic_child");
+  const routes = [];
+
+  const stop = router.startRouter((route) => {
+    routes.push(route);
+  }, fakeWindow);
+
+  fakeWindow.location.hash = "#/topic/topic_parent";
+  fakeWindow.dispatch("hashchange");
+
+  assert.deepEqual(routes.at(-1), {
+    name: "topic",
+    params: { id: "topic_parent" },
+  });
+
+  stop();
+});
