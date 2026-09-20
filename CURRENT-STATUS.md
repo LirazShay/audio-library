@@ -7,9 +7,9 @@ Audio Library
 Implementation in progress.
 
 ## Current milestone
-M5 — Track lists — COMPLETE
+M6 — Audio Engine — COMPLETE
 
-M6 — Audio Engine — IN PROGRESS
+M7 — Full Player — NOT STARTED
 
 ## Completed
 - Product Requirements
@@ -27,115 +27,45 @@ M6 — Audio Engine — IN PROGRESS
 - M2 — Library Loader
 - M3 — Router and basic navigation
 - M4 — Topics and subtopics
-- M5.1 — reusable TrackRow and Topic Track lists
-- M5.2 — root Track lists and full M5 verification
+- M5 — Track lists
 - M6.1 — singleton Audio engine foundation and central player state
 - M6.2 — Audio control methods and safe seek/skip behavior
+- M6.3 — Track Page Audio integration and complete M6 verification
 
-## M5 result
-- Added reusable `src/app/components/track-row.js`
-- `TrackRow` uses direct Track hash routes through the Router contract
-- Topic pages display direct Track children under a dedicated `קטעי שמע` list
-- Home supports Tracks that exist directly under the logical root
-- Home and Topic pages reuse the same TrackRow component
-- Topics and Tracks are shown in separate sections
-- Topic sections appear before Track sections
-- Track order is preserved exactly from generated JSON
-- The browser does not re-sort Track lists
-- Tracks without TXT remain visible and navigable
-- Empty Track sections are omitted
-- Long titles wrap safely
-- Optional duration is shown only when valid duration data exists
-- Track direct URLs continue to open the basic Track page
-- No audio playback implementation was added; playback begins in M6
+## M6 result
+- Exactly one shared `Audio` instance exists for the application
+- Audio Service is initialized once from `main.js`
+- Central Player State uses Preact Signals
+- `loadTrack(track, context)` loads a Track without autoplay
+- Switching Tracks reuses the same Audio instance
+- Media events update central Player State
+- `play()`, `pause()`, `seek()`, `skipForward()` and `skipBackward()` are implemented
+- Seek and skip are safely clamped
+- Rejected `audio.play()` Promises become controlled Player errors
+- MP3 and M4A source paths are accepted
+- Audio load/error events become controlled Hebrew user-facing errors
+- Track Page now loads the routed Track into the global Audio Engine
+- Returning to the already-current Track does not reload or interrupt the existing Audio
+- Track Page provides basic Play/Pause
+- Track Page provides ±10 second controls
+- Track Page provides a seek range
+- Track Page displays current time and duration
+- Track Page displays loading, buffering, ended and error states
+- Direct Track routes still do not autoplay
+- No M7-only advanced controls were added
 
-## M5 automated verification
+## M6 automated verification
 GitHub Actions `Test App`: PASS
 
-M5 Track tests:
-- tests: 14
-- pass: 14
+Audio Service:
+- tests: 12
+- pass: 12
 - fail: 0
 
-Regression:
-- Library Service: 10/10 PASS
-- Router: 12/12 PASS
-- App routing: 7/7 PASS
-- M3 integration: 4/4 PASS
-- M4 Topic/Breadcrumb: 12/12 PASS
-
-## M5 Definition of Done
-- reusable TrackRow exists: PASS
-- Track title is visible: PASS
-- Track row opens direct Track route: PASS
-- Topic with Tracks only is supported: PASS
-- Topic with both child Topics and Tracks is supported: PASS
-- nested Topic Tracks are supported: PASS
-- Tracks directly under root are supported: PASS
-- Topic UI places child Topics before Tracks: PASS
-- Track list order matches JSON order: PASS
-- no browser-side Track sorting: PASS
-- Track without TXT remains visible: PASS
-- empty Track list is not rendered unnecessarily: PASS
-- long Track titles are supported: PASS
-- optional duration is handled without invented data: PASS
-- all current sample Tracks have valid direct URLs: PASS
-- Track direct URL routing remains functional: PASS
-- no Audio Engine/playback leaked into M5: PASS
-- full automated regression suite passes: PASS
-
-## M6.1 result
-- Added `src/app/state/player-state.js`
-- Added central Signals for:
-  - `currentTrack`
-  - `currentContext`
-  - `isPlaying`
-  - `playerStatus`
-  - `currentTime`
-  - `duration`
-  - `playbackRate`
-  - `volume`
-  - `playerError`
-- Added `PLAYER_STATUS` values: idle/loading/ready/playing/paused/buffering/ended/error
-- Added `src/app/services/audio-service.js`
-- Added exactly one shared Audio instance for the application
-- Audio service is initialized once from `main.js`
-- Added `loadTrack(track, context)`
-- Track audio URLs are resolved relative to the deployed site structure
-- Loading a Track updates current Track/context and resets time/duration/error state
-- Loading a Track never autoplays
-- Switching Tracks reuses the same Audio instance and replaces its source
-- Media events are translated into central Player State:
-  - `loadedmetadata`
-  - `durationchange`
-  - `timeupdate`
-  - `play`
-  - `pause`
-  - `waiting`
-  - `playing`
-  - `ended`
-  - `error`
-- Audio error state is converted to a controlled Hebrew user-facing message
-- No Full Player UI, Mini Player, play/pause buttons, seek controls, or M7 work was added
-
-## M6.1 automated verification
-GitHub Actions `Test App`: PASS
-
-Audio Service tests:
-- tests: 5
-- pass: 5
+M6 Track Page integration:
+- tests: 8
+- pass: 8
 - fail: 0
-
-Coverage:
-- one shared Audio instance: PASS
-- repeated initialization reuses the same Audio: PASS
-- `loadTrack()` updates central state: PASS
-- no autoplay on load: PASS
-- media events update Player State: PASS
-- Track switching reuses the same Audio: PASS
-- invalid Track input is rejected: PASS
-- missing audio path is rejected: PASS
-- startup wiring from `main.js`: PASS
 
 Regression:
 - Library Service: 10/10 PASS
@@ -145,54 +75,29 @@ Regression:
 - M4 Topic/Breadcrumb: 12/12 PASS
 - M5 Track lists: 14/14 PASS
 
-## M6.2 result
-- Added `play()`
-- Added `pause()`
-- Added `seek(targetTime)`
-- Added `skipForward(seconds = 10)`
-- Added `skipBackward(seconds = 10)`
-- All control methods operate only on the single shared Audio instance
-- Controls require a loaded Track and reject invalid usage explicitly
-- `seek()` clamps below zero to 0
-- `seek()` clamps above the known duration to the Track duration
-- `seek()` allows non-negative targets while duration is still unknown
-- Skip forward/backward reuse `seek()`, so they inherit the same clamping rules
-- Invalid seek and skip values are rejected
-- Successful `play()` remains event-driven through the native Audio events
-- Rejected `audio.play()` Promises set a controlled player error:
-  - `isPlaying = false`
-  - `playerStatus = error`
-  - Hebrew user-facing `playerError`
-- No Full Player UI or M7 work was added
-
-## M6.2 automated verification
-GitHub Actions `Test App`: PASS
-
-Audio Service tests:
-- tests: 11
-- pass: 11
-- fail: 0
-
-New M6.2 coverage:
-- play control: PASS
-- pause control: PASS
-- seek below zero clamp: PASS
-- seek above duration clamp: PASS
-- seek before metadata/duration known: PASS
-- default +10 seconds: PASS
-- default -10 seconds: PASS
-- custom skip and boundary clamp: PASS
-- controls without loaded Track: PASS
-- invalid seek/skip values: PASS
-- rejected `audio.play()` Promise → controlled error: PASS
-
-Regression:
-- Library Service: 10/10 PASS
-- Router: 12/12 PASS
-- App routing: 7/7 PASS
-- M3 integration: 4/4 PASS
-- M4 Topic/Breadcrumb: 12/12 PASS
-- M5 Track lists: 14/14 PASS
+## M6 Definition of Done
+- one Audio instance only: PASS
+- two Tracks cannot play through separate Audio instances: PASS
+- switching Track while playing reuses and resets the shared Audio: PASS
+- Player State updates from native Audio events: PASS
+- Play works through Audio Service: PASS
+- Pause works through Audio Service: PASS
+- Seek works and clamps safely: PASS
+- ±10 second skip works and clamps safely: PASS
+- current time is reflected in Player State/UI: PASS
+- duration is reflected in Player State/UI: PASS
+- loading state is visible: PASS
+- buffering state is visible: PASS
+- ended state is visible: PASS
+- Audio error is controlled and visible: PASS
+- rejected play Promise is controlled: PASS
+- MP3 source handling: PASS
+- M4A source handling: PASS
+- unknown Track route remains Not Found: PASS
+- direct Track URL loads without autoplay: PASS
+- returning to current Track does not unnecessarily reload Audio: PASS
+- Track Page provides basic functional controls: PASS
+- complete automated regression suite passes: PASS
 
 ## Sample content
 - 2 top-level sample topics
@@ -200,25 +105,24 @@ Regression:
 - 4 valid WAV files
 - 3 matching TXT files
 - 1 Audio file without TXT by design
-- current sample has no root-level Track; root-level Track rendering is covered by implementation/contract tests
 
 ## Local testing
 - Run `tools/update-and-preview.cmd`
 - Local preview URL: `http://127.0.0.1:8080/`
-- `נושא לדוגמה 1` shows one child Topic and two Tracks
-- `תת נושא` shows one Track
-- `נושא לדוגמה 2` shows one Track
-- clicking a Track opens its basic Track page
+- Open any sample Track
+- The basic player can Play/Pause, seek, and skip ±10 seconds
+- The page displays current time and duration after metadata loads
+- Navigating away does not destroy the global Audio instance
 
 ## Deployment
 GitHub Pages workflow remains configured and active.
 
 ## Next
-M6.3 — connect the basic Track Page to the Audio Engine: load the routed Track into the shared Audio service, expose basic Play/Pause/Seek/time controls, show loading/buffering/error states, and run the complete M6 Definition of Done. Do not begin M7 Full Player polish yet.
-
+M7 — Full Player has not started. The next explicit stage command should begin M7.1 by extracting the proven M6 controls into reusable `FullPlayer` and `ProgressBar` components, keeping behavior unchanged before adding advanced M7 controls.
 
 ## Working rule
 Each future "Continue to the next stage" command advances exactly one logical sub-stage.
-Milestones M3 through M7 may be split into as many sub-stages as needed for quality.
+M7 may be split into as many sub-stages as needed for quality.
 Do not report final completion until M7 is fully complete and verified.
+Only after all of M7 is complete, end the response with the word `סיימתי`.
 GitHub is the source of truth.
