@@ -25,6 +25,7 @@ import {
   toggleMute,
 } from "../services/audio-service.js";
 import { ProgressBar } from "./progress-bar.js";
+import { PlayerVisualization } from "./player-visualization.js";
 
 function getStatusMessage(status) {
   if (status === "loading") {
@@ -87,7 +88,23 @@ export function FullPlayer({ track }) {
 
   return html`
     <section class="basic-player" aria-label="נגן שמע">
+      <${PlayerVisualization}
+        currentTime=${time}
+        duration=${totalDuration}
+        status=${status}
+      />
+
       <div class="basic-player__controls">
+        <button
+          type="button"
+          class="player-button player-button--secondary player-nav-placeholder"
+          disabled
+          aria-label="הקטע הקודם"
+          title="יהיה זמין לאחר חיבור הקשר ההאזנה"
+        >
+          הקודם
+        </button>
+
         <button
           type="button"
           class="player-button player-button--secondary"
@@ -115,6 +132,16 @@ export function FullPlayer({ track }) {
           aria-label="דלג 10 שניות קדימה"
         >
           +10
+        </button>
+
+        <button
+          type="button"
+          class="player-button player-button--secondary player-nav-placeholder"
+          disabled
+          aria-label="הקטע הבא"
+          title="יהיה זמין לאחר חיבור הקשר ההאזנה"
+        >
+          הבא
         </button>
       </div>
 
