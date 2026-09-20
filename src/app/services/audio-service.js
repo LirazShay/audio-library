@@ -17,6 +17,7 @@ const PLAYBACK_RATES = Object.freeze([0.75, 1, 1.25, 1.5, 1.75, 2]);
 
 let audioElement = null;
 let listenersAttached = false;
+let progressFrameId = null;
 
 function resolveAudioUrl(audioPath) {
   if (typeof audioPath !== "string" || audioPath.trim() === "") {
@@ -32,6 +33,45 @@ function setDurationFromAudio(audio) {
     : 0;
 }
 
+function syncCurrentTimeFromAudio(audio) {
+  const nextTime = Number.isFinite(audio.currentTime) ? audio.currentTime : 0;
+
+  if (currentTime.value !== nextTime) {
+    currentTime.value = nextTime;
+  }
+}
+
+function stopProgressSync() {
+  if (
+    progressFrameId !== null &&
+    typeof globalThis.cancelAnimationFrame === "function"
+  ) {
+    globalThis.cancelAnimationFrame(progressFrameId);
+  }
+
+  progressFrameId = null;
+}
+
+function startProgressSync(audio) {
+  if (
+    progressFrameId !== null ||
+    typeof globalThis.requestAnimationFrame !== "function"
+  ) {
+    return;
+  }
+
+  const tick = () => {
+    progressFrameId = null;
+    syncCurrentTimeFromAudio(audio);
+
+    if (isPlaying.value) {
+      progressFrameId = globalThis.requestAnimationFrame(tick);
+    }
+  };
+
+  progressFrameId = globalThis.requestAnimationFrame(tick);
+}
+
 function attachAudioListeners(audio) {
   if (listenersAttached) {
     return;
@@ -39,7 +79,7 @@ function attachAudioListeners(audio) {
 
   audio.addEventListener("loadedmetadata", () => {
     setDurationFromAudio(audio);
-    currentTime.value = Number.isFinite(audio.currentTime) ? audio.currentTime : 0;
+    syncCurrentTimeFromAudio(audio);
     playerStatus.value = PLAYER_STATUS.READY;
     playerError.value = null;
   });
@@ -49,17 +89,20 @@ function attachAudioListeners(audio) {
   });
 
   audio.addEventListener("timeupdate", () => {
-    currentTime.value = Number.isFinite(audio.currentTime) ? audio.currentTime : 0;
+    syncCurrentTimeFromAudio(audio);
   });
 
   audio.addEventListener("play", () => {
     isPlaying.value = true;
     playerStatus.value = PLAYER_STATUS.PLAYING;
     playerError.value = null;
+    startProgressSync(audio);
   });
 
   audio.addEventListener("pause", () => {
+    syncCurrentTimeFromAudio(audio);
     isPlaying.value = false;
+    stopProgressSync();
 
     if (
       playerStatus.value !== PLAYER_STATUS.LOADING &&
@@ -78,16 +121,19 @@ function attachAudioListeners(audio) {
     isPlaying.value = true;
     playerStatus.value = PLAYER_STATUS.PLAYING;
     playerError.value = null;
+    startProgressSync(audio);
   });
 
   audio.addEventListener("ended", () => {
+    syncCurrentTimeFromAudio(audio);
     isPlaying.value = false;
-    currentTime.value = Number.isFinite(audio.currentTime) ? audio.currentTime : 0;
+    stopProgressSync();
     playerStatus.value = PLAYER_STATUS.ENDED;
   });
 
   audio.addEventListener("error", () => {
     isPlaying.value = false;
+    stopProgressSync();
     playerStatus.value = PLAYER_STATUS.ERROR;
     playerError.value = "לא ניתן לטעון את קובץ השמע.";
   });
@@ -284,6 +330,8 @@ export function loadTrack(track, context = null) {
 
   const audio = initializeAudioService();
   const source = resolveAudioUrl(track.audio);
+
+  stopProgressSync();
 
   if (typeof audio.pause === "function") {
     audio.pause();
