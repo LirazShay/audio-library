@@ -9,6 +9,29 @@ const moduleUrl = pathToFileURL(
 
 const router = await import(`${moduleUrl}?test=${Date.now()}`);
 
+function createFakeWindow(initialHash = "") {
+  const listeners = new Map();
+
+  return {
+    location: {
+      hash: initialHash,
+    },
+    addEventListener(type, handler) {
+      const handlers = listeners.get(type) ?? new Set();
+      handlers.add(handler);
+      listeners.set(type, handlers);
+    },
+    removeEventListener(type, handler) {
+      listeners.get(type)?.delete(handler);
+    },
+    dispatch(type) {
+      for (const handler of listeners.get(type) ?? []) {
+        handler();
+      }
+    },
+  };
+}
+
 test("parseRoute maps empty/hash root values to home", () => {
   for (const hash of ["", "#", "#/"]) {
     assert.deepEqual(router.parseRoute(hash), {
@@ -85,4 +108,77 @@ test("buildRoute and parseRoute round-trip encoded IDs", () => {
     name: "topic",
     params: { id: "נושא מיוחד 10" },
   });
+});
+
+
+test("startRouter syncs initial location and hashchange updates", () => {
+  const fakeWindow = createFakeWindow("#/topic/topic_123");
+  const routes = [];
+
+  const stop = router.startRouter((route) => {
+    routes.push(route);
+  }, fakeWindow);
+
+  assert.deepEqual(routes, [
+    {
+      name: "topic",
+      params: { id: "topic_123" },
+    },
+  ]);
+
+  fakeWindow.location.hash = "#/track/track_456";
+  fakeWindow.dispatch("hashchange");
+
+  assert.deepEqual(routes.at(-1), {
+    name: "track",
+    params: { id: "track_456" },
+  });
+
+  stop();
+  fakeWindow.location.hash = "#/";
+  fakeWindow.dispatch("hashchange");
+
+  assert.equal(routes.length, 2);
+});
+
+test("navigate updates the browser hash and returns it", () => {
+  const fakeWindow = createFakeWindow("#/");
+
+  assert.equal(
+    router.navigate("topic", { id: "נושא 1" }, fakeWindow),
+    "#/topic/%D7%A0%D7%95%D7%A9%D7%90%201"
+  );
+
+  assert.equal(
+    fakeWindow.location.hash,
+    "#/topic/%D7%A0%D7%95%D7%A9%D7%90%201"
+  );
+});
+
+test("navigate leaves an identical hash unchanged", () => {
+  const fakeWindow = createFakeWindow("#/track/track_1");
+
+  assert.equal(
+    router.navigate("track", { id: "track_1" }, fakeWindow),
+    "#/track/track_1"
+  );
+
+  assert.equal(fakeWindow.location.hash, "#/track/track_1");
+});
+
+test("startRouter and navigate reject missing browser dependencies", () => {
+  assert.throws(
+    () => router.startRouter(null, createFakeWindow()),
+    /onRouteChange callback/
+  );
+
+  assert.throws(
+    () => router.startRouter(() => {}, null),
+    /browser-like window object/
+  );
+
+  assert.throws(
+    () => router.navigate("home", {}, null),
+    /browser-like window object/
+  );
 });
