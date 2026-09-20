@@ -8,6 +8,7 @@ const library = JSON.parse(fs.readFileSync("src/data/library.json", "utf8"));
 const homeSource = fs.readFileSync("src/app/pages/home-page.js", "utf8");
 const topicPageSource = fs.readFileSync("src/app/pages/topic-page.js", "utf8");
 const topicCardSource = fs.readFileSync("src/app/components/topic-card.js", "utf8");
+const breadcrumbSource = fs.readFileSync("src/app/components/breadcrumb.js", "utf8");
 const componentsCss = fs.readFileSync("src/styles/components.css", "utf8");
 const responsiveCss = fs.readFileSync("src/styles/responsive.css", "utf8");
 
@@ -104,4 +105,23 @@ test("TopicPage has distinct truly-empty and no-subtopics states", () => {
 test("TopicPage structure is depth-independent", () => {
   assert.doesNotMatch(topicPageSource, /parentId|depth\s*[<=>]|level\s*[<=>]|slice\(0,/);
   assert.match(topicPageSource, /TopicCard/);
+});
+
+
+test("TopicPage builds Breadcrumb data from the indexed Topic trail", () => {
+  assert.match(topicPageSource, /getTopicTrail\(topic\.id\)/);
+  assert.match(topicPageSource, /<\$\{Breadcrumb\} topics=\$\{breadcrumbTopics\}/);
+});
+
+test("Breadcrumb links Home and ancestor Topics while marking the current Topic", () => {
+  assert.match(breadcrumbSource, /href="#\/"/);
+  assert.match(breadcrumbSource, /buildRoute\(ROUTE_NAMES\.TOPIC/);
+  assert.match(breadcrumbSource, /aria-current="page"/);
+  assert.match(breadcrumbSource, /topics\.map/);
+});
+
+test("Breadcrumb remains usable at deep hierarchy widths", () => {
+  assert.match(componentsCss, /\.breadcrumb\s*\{/);
+  assert.match(componentsCss, /overflow-x:\s*auto/);
+  assert.match(componentsCss, /min-width:\s*max-content/);
 });
