@@ -30,6 +30,7 @@ M6 — Audio Engine — IN PROGRESS
 - M5.1 — reusable TrackRow and Topic Track lists
 - M5.2 — root Track lists and full M5 verification
 - M6.1 — singleton Audio engine foundation and central player state
+- M6.2 — Audio control methods and safe seek/skip behavior
 
 ## M5 result
 - Added reusable `src/app/components/track-row.js`
@@ -144,6 +145,55 @@ Regression:
 - M4 Topic/Breadcrumb: 12/12 PASS
 - M5 Track lists: 14/14 PASS
 
+## M6.2 result
+- Added `play()`
+- Added `pause()`
+- Added `seek(targetTime)`
+- Added `skipForward(seconds = 10)`
+- Added `skipBackward(seconds = 10)`
+- All control methods operate only on the single shared Audio instance
+- Controls require a loaded Track and reject invalid usage explicitly
+- `seek()` clamps below zero to 0
+- `seek()` clamps above the known duration to the Track duration
+- `seek()` allows non-negative targets while duration is still unknown
+- Skip forward/backward reuse `seek()`, so they inherit the same clamping rules
+- Invalid seek and skip values are rejected
+- Successful `play()` remains event-driven through the native Audio events
+- Rejected `audio.play()` Promises set a controlled player error:
+  - `isPlaying = false`
+  - `playerStatus = error`
+  - Hebrew user-facing `playerError`
+- No Full Player UI or M7 work was added
+
+## M6.2 automated verification
+GitHub Actions `Test App`: PASS
+
+Audio Service tests:
+- tests: 11
+- pass: 11
+- fail: 0
+
+New M6.2 coverage:
+- play control: PASS
+- pause control: PASS
+- seek below zero clamp: PASS
+- seek above duration clamp: PASS
+- seek before metadata/duration known: PASS
+- default +10 seconds: PASS
+- default -10 seconds: PASS
+- custom skip and boundary clamp: PASS
+- controls without loaded Track: PASS
+- invalid seek/skip values: PASS
+- rejected `audio.play()` Promise → controlled error: PASS
+
+Regression:
+- Library Service: 10/10 PASS
+- Router: 12/12 PASS
+- App routing: 7/7 PASS
+- M3 integration: 4/4 PASS
+- M4 Topic/Breadcrumb: 12/12 PASS
+- M5 Track lists: 14/14 PASS
+
 ## Sample content
 - 2 top-level sample topics
 - 1 nested subtopic
@@ -164,7 +214,7 @@ Regression:
 GitHub Pages workflow remains configured and active.
 
 ## Next
-M6.2 — add Audio Service control methods: `play()`, `pause()`, `seek()`, `skipForward(10)`, and `skipBackward(10)`, including clamping and play-promise failure handling. Do not build the M7 Full Player UI yet.
+M6.3 — connect the basic Track Page to the Audio Engine: load the routed Track into the shared Audio service, expose basic Play/Pause/Seek/time controls, show loading/buffering/error states, and run the complete M6 Definition of Done. Do not begin M7 Full Player polish yet.
 
 
 ## Working rule
