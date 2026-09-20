@@ -7,9 +7,9 @@ Audio Library
 Implementation in progress.
 
 ## Current milestone
-M2 — Library Loader — COMPLETE
+M3 — Router and basic navigation — COMPLETE
 
-M3 — Router and basic navigation — IN PROGRESS
+M4 — Topics and subtopics — NOT STARTED
 
 ## Completed
 - Product Requirements
@@ -24,179 +24,72 @@ M3 — Router and basic navigation — IN PROGRESS
 - Production / Release Checklist
 - M0 — Project Skeleton
 - M1 — Basic Generator
-- M2.1 — single-load library fetch, envelope validation, and app loading state
-- M2.2 — recursive in-memory Topic/Track indexes and lookup API
-- M2.3 — loaded-state Topic/Track totals and full M2 regression pass
+- M2 — Library Loader
 - M3.1 — pure hash route parsing/building contract
 - M3.2 — browser hash runtime and current route Signal
 - M3.3 — route-aware Home and Not Found pages
+- M3.4 — Topic/Track ID resolution, direct URL and refresh verification
 
-## M2.3 result
-- Basic loaded-state UI now uses the Library Service API instead of counting root children
-- Displays the total number of Topics across all depths
-- Displays the total number of Tracks across all depths
-- No routing, Topic pages, Track pages, or M3 work was added
+## M3.4 result
+- Added minimal `TopicPage` and `TrackPage` route targets
+- Topic routes resolve their ID through `getTopic(id)`
+- Track routes resolve their ID through `getTrack(id)`
+- Existing Topic IDs render the resolved Topic name
+- Existing Track IDs render the resolved Track title
+- Unknown Topic IDs render `NotFoundPage`
+- Unknown Track IDs render `NotFoundPage`
+- Minimal Topic/Track pages intentionally defer real content UI to later milestones
+- No M4 topic hierarchy UI, breadcrumbs, track lists, or player work was added
 
-With the current sample content the loaded state represents:
-- 3 Topics total (including the nested subtopic, excluding logical root)
-- 4 Tracks total
-
-## M2 automated verification
-GitHub Actions `Test App` completed successfully after the final M2 changes.
-
-Library Service:
-- tests: 9
-- pass: 9
-- fail: 0
-
-Final regression checks:
-- browser module syntax: PASS
-- reactive Preact App mounting guard: PASS
-- valid current `library.json`: PASS
-- unsupported schema rejection: PASS
-- single Fetch / Promise reuse: PASS
-- missing JSON handling: PASS
-- malformed JSON handling: PASS
-- network failure handling: PASS
-- recursive Topic/Track indexes: PASS
-- ID lookups: PASS
-- unknown ID behavior: PASS
-- M2 loaded-state UI totals wiring: PASS
-- real repository `library.json` recursive index verification: PASS
-
-## M2 Definition of Done
-- `library.json` loads in the browser: PASS
-- supported `schemaVersion` is validated: PASS
-- library is loaded only once per page session: PASS
-- no repeated Fetch on page/component use: PASS
-- loaded library remains in memory: PASS
-- `topicsById` Map is built: PASS
-- `tracksById` Map is built: PASS
-- `getRoot()` works: PASS
-- `getTopic(id)` works: PASS
-- `getTrack(id)` works: PASS
-- `getAllTopics()` works: PASS
-- `getAllTracks()` works: PASS
-- recursive depth is supported: PASS
-- Loading state is shown: PASS
-- Ready state is shown: PASS
-- Topic and Track totals are shown: PASS
-- missing JSON is handled without unmounting the App: PASS
-- malformed JSON is handled without unmounting the App: PASS
-- unsupported schema is rejected clearly: PASS
-- network failure is handled as controlled error state: PASS
-- automated regression suite passes: PASS
-
-## M3.1 result
-- Added `src/app/services/router-service.js`
-- Added route names for `home`, `topic`, `track`, and `not-found`
-- Added pure `parseRoute(hash)`
-- Added pure `buildRoute(name, params)`
-- Home accepts `""`, `"#"`, and `"#/"`
-- Topic route format: `#/topic/:id`
-- Track route format: `#/track/:id`
-- Route IDs are URL encoded/decoded safely
-- Unknown, malformed, missing-ID, and bad-percent-encoding routes resolve to `not-found`
-- Unsupported route names and missing IDs are rejected when building routes
-- No browser event wiring, Signals, navigation side effects, pages, or M3.2 work was added
-
-## M3.1 automated verification
+## M3 automated verification
 GitHub Actions `Test App`: PASS
-
-Router tests:
-- tests: 7
-- pass: 7
-- fail: 0
-
-Coverage:
-- Home parsing: PASS
-- Topic parsing: PASS
-- Track parsing: PASS
-- invalid route handling: PASS
-- Home/Topic/Track route building: PASS
-- missing ID rejection: PASS
-- Unicode/space ID round-trip: PASS
-
-Existing Library Service regression:
-- tests: 9
-- pass: 9
-- fail: 0
-
-## M3.2 result
-- Added `src/app/state/router-state.js`
-- Added reactive `currentRoute` using Preact Signals
-- Added `setCurrentRoute(route)`
-- Added `startRouter(onRouteChange, window)`
-- Router initializes from the current `window.location.hash`
-- Router listens to `hashchange`, so browser Back/Forward can update route state
-- Added `navigate(name, params, window)`
-- Navigation uses the M3.1 `buildRoute()` contract and updates the browser hash
-- Same-hash navigation avoids unnecessary assignment
-- `main.js` initializes the router before rendering the App
-- `startRouter()` returns an unsubscribe function for clean event-listener removal
-- No page rendering, Topic/Track page UI, or M3.3 work was added
-
-## M3.2 automated verification
-GitHub Actions `Test App`: PASS
-
-Router tests:
-- tests: 11
-- pass: 11
-- fail: 0
-
-New M3.2 coverage:
-- initial route sync from browser hash: PASS
-- `hashchange` route update: PASS
-- listener unsubscribe: PASS
-- `navigate()` hash update: PASS
-- encoded Unicode navigation: PASS
-- same-hash navigation: PASS
-- invalid browser dependency guards: PASS
-- Preact `currentRoute` Signal wiring: PASS
-- router startup from `main.js`: PASS
-
-Existing Library Service regression:
-- tests: 9
-- pass: 9
-- fail: 0
-
-## M3.3 result
-- Added `src/app/pages/home-page.js`
-- Added `src/app/pages/not-found-page.js`
-- `App` now renders from the reactive `currentRoute` Signal
-- Home route renders `HomePage`
-- Invalid/not-found route renders `NotFoundPage`
-- `NotFoundPage` provides a `#/` link back Home
-- Library loading/error states remain global App states
-- M2 total Topic/Track counts moved cleanly into `HomePage`
-- Topic and Track routes remain explicit temporary placeholders only
-- No Topic page, Track page, ID validation, breadcrumb, or M4 work was added
-
-## M3.3 automated verification
-GitHub Actions `Test App`: PASS
-
-App routing tests:
-- tests: 5
-- pass: 5
-- fail: 0
-
-Coverage:
-- reactive `currentRoute` use: PASS
-- Home → `HomePage`: PASS
-- not-found → `NotFoundPage`: PASS
-- Topic/Track placeholder boundary: PASS
-- M2 Topic/Track totals preserved in Home: PASS
-- Home link from Not Found: PASS
-
-Router regression:
-- tests: 11
-- pass: 11
-- fail: 0
 
 Library Service regression:
 - tests: 9
 - pass: 9
 - fail: 0
+
+Router tests:
+- tests: 11
+- pass: 11
+- fail: 0
+
+App routing tests:
+- tests: 7
+- pass: 7
+- fail: 0
+
+M3 real-library integration tests:
+- tests: 4
+- pass: 4
+- fail: 0
+
+Integration coverage:
+- direct Topic hash URL resolves against real `library.json`: PASS
+- direct Track hash URL resolves against real `library.json`: PASS
+- unknown Topic ID does not resolve: PASS
+- unknown Track ID does not resolve: PASS
+- refresh of a direct hash URL restores the same route: PASS
+
+## M3 Definition of Done
+- custom Hash Router exists with no external Router dependency: PASS
+- `#/` Home route works: PASS
+- `#/topic/:id` parsing/building works: PASS
+- `#/track/:id` parsing/building works: PASS
+- malformed route becomes Not Found: PASS
+- unknown Topic/Track ID becomes Not Found after library load: PASS
+- current route is reactive via Signal: PASS
+- router initializes from `window.location.hash`: PASS
+- `hashchange` updates current route: PASS
+- `navigate()` updates the Hash: PASS
+- browser Back/Forward model is supported through native Hash history + `hashchange`: PASS
+- direct hash URL works: PASS
+- refresh preserves the direct hash route: PASS
+- Home and Not Found pages render correctly: PASS
+- valid Topic and Track routes reach dedicated minimal pages: PASS
+- library loading/error state remains independent from route errors: PASS
+- existing M2 behavior remains green: PASS
+- automated M3 regression suite passes: PASS
 
 ## Sample content
 - 2 top-level sample topics
@@ -208,14 +101,14 @@ Library Service regression:
 ## Local testing
 - Run `tools/update-and-preview.cmd`
 - Local preview URL: `http://127.0.0.1:8080/`
-- Expected M2 loaded message with current sample content: 3 Topics and 4 Tracks
+- Home should still show 3 Topics and 4 Tracks with current sample content
+- Hash URLs now support Home, Topic, Track, and Not Found routing
 
 ## Deployment
 GitHub Pages workflow remains configured and active.
 
 ## Next
-M3.4 — resolve Topic/Track route IDs against the loaded Library. Existing IDs should reach dedicated minimal route pages/placeholders; unknown Topic/Track IDs should render Not Found. Then verify direct URLs and refresh behavior before closing M3.
-
+M4 — Topics and subtopics has not started. The next explicit stage command should begin M4.1 with root Topic presentation and reusable Topic navigation UI, without adding Track-list behavior from M5.
 
 ## Working rule
 Each future "Continue to the next stage" command advances exactly one logical sub-stage.
