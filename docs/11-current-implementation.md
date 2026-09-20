@@ -376,3 +376,50 @@ https://lirazshay.github.io/audio-library/
 Only `src/` is deployed to GitHub Pages.
 
 Development documentation and tools remain repository-only.
+
+
+## 18. Headless browser E2E
+
+Browser-level behavior is now verified with Playwright.
+
+Files:
+
+```text
+package.json
+playwright.config.cjs
+e2e/player.spec.js
+.github/workflows/test-e2e.yml
+```
+
+GitHub Actions runs real Chromium in headless mode against the real local Node server.
+
+Projects:
+
+- desktop Chromium: 1440x1000
+- mobile Chromium: 390x844 with touch/mobile emulation
+
+Current browser E2E coverage includes:
+
+- Home -> Topic -> Track navigation
+- real WAV metadata loading
+- real audio playback
+- visible current-time advancement
+- seek slider advancement
+- progress percentage advancement above 0%
+- seek interaction
+- playback speed selection
+- repeat-current
+- desktop mute
+- mobile volume-hidden behavior
+- no horizontal overflow
+- mobile seek width
+
+Failure diagnostics retain:
+
+- screenshot
+- Playwright trace
+- video
+
+These artifacts are uploaded by GitHub Actions when E2E fails.
+
+The E2E suite complements, rather than replaces, the existing unit/service/contract tests.
