@@ -3,27 +3,49 @@
 ## Continuation snapshot
 
 ### Cross-chat continuity project
-IN PROGRESS
+COMPLETE
+
+The repository now contains a complete continuity layer so a new ChatGPT session can continue without receiving the previous chat transcript.
+
+Implemented:
+- stable root entry point: `AI-START-HERE.md`
+- current implementation snapshot
+- cross-chat development workflow
+- durable decisions log
+- testing/troubleshooting knowledge base
+- chat handoff protocol
+- canonical ChatGPT Project Instructions
+- automated Documentation Contract CI
 
 ### Product implementation
 - M0–M7: COMPLETE
 - M8 Mini/global player: NOT STARTED
 
 ### Immediate next action
-Complete the cross-chat continuity hardening:
-1. add documentation-contract automated checks/CI
-2. add the canonical ChatGPT Project Instructions document
-3. run the documentation checks
-4. mark this continuity project COMPLETE
+
+Before beginning a new product milestone, resolve the one remaining manual verification:
+
+1. run `tools\update-and-preview.cmd`
+2. play one of the 45/70/95-second fixtures
+3. confirm visible current time, seek position, percentage, and progress ring advance during playback
+
+If confirmed:
+- mark the progress incident manually verified
+- the next formal product work is M8 / Mini Player
+- when the user says `תמשיך לשלב הבא`, begin exactly one M8 logical sub-stage after reading the documented M8 scope
+
+If still broken:
+- do not begin M8 yet
+- follow the diagnostic-panel plan in `docs/14-testing-troubleshooting.md`
 
 ### Manual verification still pending
-The latest live-progress + local media Range/restart fixes are automated-test verified, but the user has not yet confirmed in this chat that visible time/percentage now advances correctly in their local browser.
 
-Do not claim that manual incident is closed until the user confirms it.
+The latest live-progress + local media Range/restart fixes are automated-test verified, but the user has not yet confirmed that visible time/percentage advances correctly in their local browser after the complete set of fixes.
 
-If it is still broken after a fresh `tools\update-and-preview.cmd` run, follow the diagnostic plan in `docs/14-testing-troubleshooting.md`.
+Do not claim that incident is manually closed until the user confirms it.
 
 ### Cross-chat entry point
+
 Every new chat starts at:
 
 ```text
@@ -31,6 +53,18 @@ AI-START-HERE.md
 ```
 
 Then reads this file and the continuity docs listed in `docs/00-project-index.md`.
+
+### Continuity verification
+
+Documentation Contract CI: PASS
+
+The contract validates that:
+- the stable entry point exists
+- current status exposes next action and pending manual verification
+- continuity documents are indexed and cross-linked
+- architectural decisions are durable
+- troubleshooting retains the unresolved audio-progress incident
+- the canonical Project Instructions exist
 
 ---
 
