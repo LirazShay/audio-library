@@ -129,16 +129,23 @@ Full regression:
 - Production URL remains `https://lirazshay.github.io/audio-library/`
 
 ## Sample content
-- 2 top-level sample topics
-- 1 nested subtopic
-- 4 valid WAV files
-- 3 matching TXT files
-- 1 Audio file without TXT by design
+- 4 top-level Topics
+- 2 nested subtopics
+- 10 WAV Tracks total
+- 8 matching TXT files
+- 2 Tracks without TXT by design
+- 1 Track directly under the logical root
+- local-player demo WAVs with approximate durations of 30, 35, 45, 55, 70, and 95 seconds
+- dedicated long-title / narrow-mobile fixture
 
 ## Local testing
 - Run `tools/update-and-preview.cmd`
 - Local preview URL: `http://127.0.0.1:8080/`
-- Open any sample Track to exercise the completed M7 Full Player
+- Home now includes `00 - פתיח לבדיקה מקומית` as a root-level Track
+- Open `בדיקות נגן ארוכות` for 45 / 70 / 95 second player fixtures
+- Open the long-name nested Topic to check mobile wrapping and Breadcrumb behavior
+- The 95-second fixture intentionally has no TXT
+- All added WAVs are synthetic local test audio, not external media
 
 ## Next
 The explicitly agreed M3–M7 implementation horizon is complete. Formal project milestone M8 exists in the broader roadmap but has not been started.

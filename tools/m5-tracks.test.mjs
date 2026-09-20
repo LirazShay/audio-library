@@ -105,7 +105,7 @@ test("every real sample Track builds a direct Track URL", () => {
     }
   }
 
-  assert.equal(tracks.length, 4);
+  assert.ok(tracks.length >= 10);
 
   for (const track of tracks) {
     const hash = router.buildRoute(router.ROUTE_NAMES.TRACK, { id: track.id });
@@ -183,4 +183,43 @@ test("Home and Topic pages both reuse the same TrackRow component", () => {
   assert.match(topicPageSource, /import \{ TrackRow \}/);
   assert.match(homeSource, /<\$\{TrackRow\}/);
   assert.match(topicPageSource, /<\$\{TrackRow\}/);
+});
+
+
+test("current demo includes a real root-level Track for Home testing", () => {
+  const rootTracks = library.root.children.filter(
+    (child) => child.type === "track"
+  );
+
+  assert.ok(rootTracks.length >= 1);
+  assert.ok(
+    rootTracks.some((track) => track.title === "00 - פתיח לבדיקה מקומית")
+  );
+});
+
+test("current demo includes longer-player and long-title fixtures", () => {
+  const longPlayerTopic = findTopicByName("בדיקות נגן ארוכות");
+  assert.ok(longPlayerTopic);
+
+  const titles = longPlayerTopic.children
+    .filter((child) => child.type === "track")
+    .map((track) => track.title);
+
+  assert.deepEqual(titles, [
+    "01 - מסלול רגוע לבדיקת ניגון",
+    "02 - בדיקת Seek ומהירות",
+    "03 - קטע ארוך ללא טקסט",
+  ]);
+
+  const longNameTopic = findTopicByName(
+    "תת נושא עם שם ארוך במיוחד לבדיקת מובייל"
+  );
+  assert.ok(longNameTopic);
+  assert.ok(
+    longNameTopic.children.some(
+      (child) =>
+        child.type === "track" &&
+        child.title === "01 - כותרת ארוכה במיוחד לבדיקת גלישה ושבירת שורות"
+    )
+  );
 });

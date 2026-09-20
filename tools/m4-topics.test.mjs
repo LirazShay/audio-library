@@ -17,16 +17,17 @@ const routerUrl = pathToFileURL(
 ).href;
 const router = await import(`${routerUrl}?m4-topics=${Date.now()}`);
 
-test("real sample library exposes exactly two root Topics", () => {
+test("current demo library exposes multiple root Topics including local test content", () => {
   const rootTopics = library.root.children.filter(
     (child) => child.type === "topic"
   );
+  const names = rootTopics.map((topic) => topic.name);
 
-  assert.equal(rootTopics.length, 2);
-  assert.deepEqual(
-    rootTopics.map((topic) => topic.name),
-    ["נושא לדוגמה 1", "נושא לדוגמה 2"]
-  );
+  assert.ok(rootTopics.length >= 4);
+  assert.ok(names.includes("בדיקות נגן ארוכות"));
+  assert.ok(names.includes("בדיקות ממשק"));
+  assert.ok(names.includes("נושא לדוגמה 1"));
+  assert.ok(names.includes("נושא לדוגמה 2"));
 });
 
 test("every real root Topic builds a valid Topic hash route", () => {
